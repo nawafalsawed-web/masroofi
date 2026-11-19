@@ -81,6 +81,9 @@ h1 img{width:38px;height:38px;border-radius:11px}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .back{background:none;color:var(--ind);padding:6px 0;min-height:0;display:flex;gap:4px;align-items:center}
 .title{font:900 40px/1.55 var(--f-disp);margin:0}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:999px;background:var(--surface);position:sticky;top:max(8px,env(safe-area-inset-top));z-index:5;box-shadow:0 0 0 1px var(--line)}
+.tabs button{background:none;color:var(--mute);min-height:40px;padding:6px 4px;font-size:14px}
+.tabs button.on{background:var(--ind);color:var(--on-ind)}
 
 /* الخزّان: مصروف اليوم. --left من ٠ إلى ١ */
 .tank{--left:1;--c:var(--ind);--deep:var(--ind-deep);position:relative;isolation:isolate;overflow:hidden;
@@ -230,21 +233,26 @@ details > :not(summary){margin-top:10px}
     </section>
   </div>
 
-  <!-- صفحة خطة -->
+  <!-- صفحة خطة: «اليوم» فيه الأساسي بس، والباقي في أقسامه -->
   <div id="walletV" class="stack" hidden>
     <div style="display:grid;gap:4px">
       <div class="nav"><button class="back" id="toHome"><svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>خططي</button><button class="ghost sm" id="editW">عدّل الخطة</button></div>
       <h2 class="title" id="wName"></h2>
     </div>
 
+    <nav class="tabs" role="tablist" aria-label="أقسام الخطة">
+      <button role="tab" data-t="today">اليوم</button><button role="tab" data-t="box">الصندوق</button><button role="tab" data-t="stats">الإحصائيات</button><button role="tab" data-t="tools">أدوات</button>
+    </nav>
+
+
+    <div data-tab="today" class="stack">
     <section class="panel empty" id="noPlan" hidden>
       <h3>الخطة خلصت مع نهاية شهرها</h3>
       <p class="note">جدّدها عشان يبدأ حساب هالشهر.</p>
       <button id="renew">جدّد الخطة</button>
     </section>
-
-    <div id="active" class="stack" hidden>
-      <section class="tank" id="hero">
+      <div id="active" class="stack" hidden>
+        <section class="tank" id="hero">
         <div class="k"><span>باقي اليوم</span><span class="tag" id="dayName"></span></div>
         <div class="big num" id="left"></div>
         <div class="sub num"><span id="dSpent"></span><span id="dBudget"></span></div>
@@ -254,22 +262,12 @@ details > :not(summary){margin-top:10px}
           <button>صرفت</button>
         </form>
       </section>
-      <ul class="ledger" id="expList"></ul>
-
-      <section class="month">
-        <div class="head"><h3 id="mLabel"></h3><span class="num note" id="mText"></span></div>
-        <div id="chartCard" style="display:grid;gap:10px">
-          <div class="chart" id="chart" role="img"></div>
-          <div class="axis"><span>أول الشهر</span><span>الفاتح = ميزانية اليوم</span><span>آخره</span></div>
-        </div>
-        <p class="note" id="mHint"></p>
-        <div id="insCard" style="display:grid;gap:12px">
-          <div class="facts" id="stats"></div>
-          <p class="note" id="insNote"></p>
-        </div>
-      </section>
+        <ul class="ledger" id="expList"></ul>
+        <p class="note" id="noExp" hidden>ما صرفت شي اليوم.</p>
+      </div>
     </div>
 
+    <div data-tab="box" class="stack">
     <section class="box">
       <div class="head"><h3>الصندوق</h3><span class="note">يتجمّع من باقي كل يوم</span></div>
       <div class="big num" id="boxBal"></div>
@@ -282,12 +280,31 @@ details > :not(summary){margin-top:10px}
       <p class="warn" id="boxWarn"></p>
       <details><summary>حركة الصندوق</summary><ul id="boxList"></ul></details>
     </section>
+    </div>
 
+    <div data-tab="stats" class="stack">
+      <div id="monthSec" class="stack">
+      <section class="month">
+        <div class="head"><h3 id="mLabel"></h3><span class="num note" id="mText"></span></div>
+        <div id="chartCard" style="display:grid;gap:10px">
+          <div class="chart" id="chart" role="img"></div>
+          <div class="axis"><span>أول الشهر</span><span>الفاتح = ميزانية اليوم</span><span>آخره</span></div>
+        </div>
+        <p class="note" id="mHint"></p>
+        <div id="insCard" style="display:grid;gap:12px">
+          <div class="facts" id="stats"></div>
+          <p class="note" id="insNote"></p>
+        </div>
+      </section>
+      </div>
     <section class="month" id="topCard" hidden>
       <h3>وين يروح صرفك هالشهر</h3>
       <ul class="places" id="top"></ul>
     </section>
+      <p class="note" id="noStats" hidden>الإحصائيات تطلع لما تبدأ الخطة شهرها.</p>
+    </div>
 
+    <div data-tab="tools" class="stack">
     <section class="panel calc">
       <h3>حاسبات</h3>
       <details open><summary>أقدر أشتريها؟</summary>
@@ -306,6 +323,7 @@ details > :not(summary){margin-top:10px}
       <details id="pastCard" hidden><summary>آخر الأيام</summary><ul id="past"></ul></details>
       <button class="ghost sm" id="exportBtn" style="justify-self:start">نزّل كل المصروفات (Excel)</button>
     </section>
+    </div>
   </div>
 
   <!-- محرر الخطة -->
@@ -379,7 +397,7 @@ function monthTotals(w, m){
 
 // ---- التنقّل ----
 let view = 'home';
-function go(v){ view = v; $('homeV').hidden = v!=='home'; $('walletV').hidden = v!=='wallet'; $('editor').hidden = v!=='editor'; scrollTo(0,0); render(); }
+function go(v){ if (v === 'wallet' && view !== 'wallet') showTab('today'); view = v; $('homeV').hidden = v!=='home'; $('walletV').hidden = v!=='wallet'; $('editor').hidden = v!=='editor'; scrollTo(0,0); render(); }
 
 // ---- العرض ----
 function render(){
@@ -459,6 +477,8 @@ function renderWallet(){
   });
 
   renderInsights(w, on); calcBuy(); calcGoal();
+  $('monthSec').hidden = !on; $('noStats').hidden = on;
+  $('noExp').hidden = !on || !!(w.days[TODAY]?.x || []).length;
 
   const past = Object.keys(w.days).filter(k=>k<TODAY && w.days[k].b != null).sort().reverse().slice(0,7);
   $('pastCard').hidden = !past.length;
@@ -609,6 +629,12 @@ $('edDel').onclick = () => twice($('edDel'), 'احذف الخطة', () => {
 // ---- أزرار ----
 $('addWallet').onclick = () => openEditor(true);
 $('toHome').onclick = () => { W = null; go('home'); };
+// أقسام الخطة: كل ما تدخل الخطة تفتح على «اليوم»
+function showTab(t){
+  document.querySelectorAll('[data-tab]').forEach(e => e.hidden = e.dataset.tab !== t);
+  document.querySelectorAll('.tabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === t); b.setAttribute('aria-selected', b.dataset.t === t); });
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { showTab(b.dataset.t); scrollTo(0,0); });
 $('editW').onclick = () => openEditor(false);
 $('renew').onclick = () => openEditor(false);
 
