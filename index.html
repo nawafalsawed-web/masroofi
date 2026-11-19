@@ -78,6 +78,9 @@ header{display:flex;justify-content:space-between;align-items:center}
 h1{font:900 30px/1.5 var(--f-disp);margin:0;display:flex;align-items:center;gap:10px;letter-spacing:.01em}
 h1 img{width:38px;height:38px;border-radius:11px}
 .date{color:var(--mute);font-size:13px}
+.hside{display:grid;justify-items:end;gap:4px}
+.theme{display:flex;align-items:center;gap:6px;min-height:34px;padding:4px 12px;font-size:13px}
+.theme .ico{width:17px;height:17px}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .back{background:none;color:var(--ind);padding:6px 0;min-height:0;display:flex;gap:4px;align-items:center}
 .title{font:900 40px/1.55 var(--f-disp);margin:0}
@@ -192,8 +195,9 @@ details > :not(summary){margin-top:10px}
 .wkt{font-weight:600;padding-top:4px}
 </style>
 
+<script>try{const t=localStorage.getItem("masroofi_theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>
 <main>
-  <header><h1><img src="icon-180.png?v=3" alt="">مصروفي</h1><span class="date" id="today"></span></header>
+  <header><h1><img src="icon-180.png?v=3" alt="">مصروفي</h1><div class="hside"><span class="date" id="today"></span><button class="ghost sm theme" id="themeBtn" type="button"></button></div></header>
 
   <!-- الرئيسية: كل الخطط -->
   <div id="homeV" class="stack">
@@ -204,31 +208,31 @@ details > :not(summary){margin-top:10px}
 
     <section class="panel" id="reviewCard" hidden>
       <h3>تحويلات تحتاج قرارك</h3>
-      <p class="note">التحويلات ما تنحسب صرف إلا لو قلت.</p>
+      <p class="note">لا تُحتسب التحويلات ضمن المصروفات إلا بعد تأكيدك.</p>
       <ul id="review"></ul>
     </section>
 
     <section class="panel" id="syncCard" hidden>
       <div class="head"><h3>رسائل البنك</h3><span class="ok" id="linked" hidden>مربوط ✓</span></div>
       <div id="linkSteps" style="display:grid;gap:12px">
-        <p class="note">كل ما وصلتك رسالة شراء من البنك تنحسب هنا لحالها.</p>
-        <button class="cta" id="linkBtn">اربط البنك بضغطة</button>
+        <p class="note">تُسجَّل عمليات الشراء تلقائياً عند وصول رسالة البنك.</p>
+        <button class="cta" id="linkBtn">ربط رسائل البنك</button>
         <ol class="steps">
-          <li>اضغط الزر، رابطك ينسخ ويفتح لك اختصار «مصروفي».</li>
-          <li>الصق الرابط واضغط <b>إضافة الاختصار</b>.</li>
-          <li>من الاختصارات: <b>أتمتة</b> ← <b>+</b> ← <b>الرسائل</b> ← تحتوي <b>SAR</b> ← <b>تشغيل فوري</b> ← اختر <b>مصروفي</b>.</li>
+          <li>اضغط الزر لنسخ رابطك وفتح اختصار «مصروفي».</li>
+          <li>الصق الرابط، ثم اضغط <b>إضافة الاختصار</b>.</li>
+          <li>من تطبيق الاختصارات: <b>أتمتة</b> ← <b>+</b> ← <b>الرسائل</b> ← تحتوي <b>SAR</b> ← <b>تشغيل فوري</b> ← اختر <b>مصروفي</b>.</li>
         </ol>
-        <p class="note">أول ما توصل رسالة بنك بتشوف «مربوط ✓» هنا.</p>
+        <p class="note">ستظهر هنا عبارة «مربوط ✓» عند وصول أول رسالة من البنك.</p>
       </div>
-      <div class="spread"><label for="target">الصرف يروح لخطة</label><select id="target"></select></div>
-      <div class="spread"><label for="ignore">تجاهل اللي يروح لـ</label><input id="ignore" class="grow" placeholder="barq, stc"></div>
-      <p class="note">الشحن لمحافظك نفسها (برق، اس تي سي) ما ينحسب عشان ما يتكرر الصرف.</p>
-      <details><summary>الرابط يدوي والأجهزة الثانية</summary>
+      <div class="spread"><label for="target">تُسجَّل المصروفات في</label><select id="target"></select></div>
+      <div class="spread"><label for="ignore">تجاهل العمليات إلى</label><input id="ignore" class="grow" placeholder="barq, stc"></div>
+      <p class="note">لا يُحتسب شحن محافظك الرقمية (برق، STC Bank) تجنباً لتكرار المصروف.</p>
+      <details><summary>الربط اليدوي والأجهزة الأخرى</summary>
         <p class="note">رابط الاختصار (Get Contents of URL، POST، JSON فيه raw = الرسالة):</p>
-        <div class="row"><input id="hookUrl" class="grow num" readonly><button class="ghost sm" id="copyHook">انسخ</button></div>
-        <p class="note">افتح هالرابط بجهاز ثاني عشان تشوف نفس البيانات:</p>
-        <div class="row"><input id="devUrl" class="grow num" readonly><button class="ghost sm" id="copyDev">انسخ</button></div>
-        <p class="warn">لا ترسل الرابطين لأحد، اللي معه الرابط يشوف بياناتك.</p>
+        <div class="row"><input id="hookUrl" class="grow num" readonly><button class="ghost sm" id="copyHook">نسخ</button></div>
+        <p class="note">افتح هذا الرابط على جهاز آخر لعرض البيانات نفسها:</p>
+        <div class="row"><input id="devUrl" class="grow num" readonly><button class="ghost sm" id="copyDev">نسخ</button></div>
+        <p class="warn">لا تشارك هذين الرابطين، فمن يملكهما يستطيع الاطلاع على بياناتك.</p>
       </details>
     </section>
   </div>
@@ -236,7 +240,7 @@ details > :not(summary){margin-top:10px}
   <!-- صفحة خطة: «اليوم» فيه الأساسي بس، والباقي في أقسامه -->
   <div id="walletV" class="stack" hidden>
     <div style="display:grid;gap:4px">
-      <div class="nav"><button class="back" id="toHome"><svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>خططي</button><button class="ghost sm" id="editW">عدّل الخطة</button></div>
+      <div class="nav"><button class="back" id="toHome"><svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>خططي</button><button class="ghost sm" id="editW">تعديل الخطة</button></div>
       <h2 class="title" id="wName"></h2>
     </div>
 
@@ -247,36 +251,36 @@ details > :not(summary){margin-top:10px}
 
     <div data-tab="today" class="stack">
     <section class="panel empty" id="noPlan" hidden>
-      <h3>الخطة خلصت مع نهاية شهرها</h3>
-      <p class="note">جدّدها عشان يبدأ حساب هالشهر.</p>
-      <button id="renew">جدّد الخطة</button>
+      <h3>انتهت الخطة بانتهاء شهرها</h3>
+      <p class="note">جدّد الخطة لبدء احتساب الشهر الحالي.</p>
+      <button id="renew">تجديد الخطة</button>
     </section>
       <div id="active" class="stack" hidden>
         <section class="tank" id="hero">
-        <div class="k"><span>باقي اليوم</span><span class="tag" id="dayName"></span></div>
+        <div class="k"><span>المتبقي اليوم</span><span class="tag" id="dayName"></span></div>
         <div class="big num" id="left"></div>
         <div class="sub num"><span id="dSpent"></span><span id="dBudget"></span></div>
         <form class="quick" id="expForm">
           <input id="expAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ" required>
-          <input id="expNote" class="grow" placeholder="على إيش؟">
-          <button>صرفت</button>
+          <input id="expNote" class="grow" placeholder="الوصف">
+          <button>تسجيل</button>
         </form>
       </section>
         <ul class="ledger" id="expList"></ul>
-        <p class="note" id="noExp" hidden>ما صرفت شي اليوم.</p>
+        <p class="note" id="noExp" hidden>لا توجد مصروفات اليوم.</p>
       </div>
     </div>
 
     <div data-tab="box" class="stack">
     <section class="box">
-      <div class="head"><h3>الصندوق</h3><span class="note">يتجمّع من باقي كل يوم</span></div>
+      <div class="head"><h3>الصندوق</h3><span class="note">يُضاف إليه المتبقي من كل يوم</span></div>
       <div class="big num" id="boxBal"></div>
       <div class="row">
         <input id="boxAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ">
-        <button class="boxbtn" id="pull">اسحب لليوم</button>
-        <button class="ghost" id="dep">أضف له</button>
+        <button class="boxbtn" id="pull">سحب لليوم</button>
+        <button class="ghost" id="dep">إيداع</button>
       </div>
-      <p class="note">اللي تضيفه للصندوق ينحسب على مجموع الشهر.</p>
+      <p class="note">يُضاف ما تودعه في الصندوق إلى ميزانية الشهر.</p>
       <p class="warn" id="boxWarn"></p>
       <details><summary>حركة الصندوق</summary><ul id="boxList"></ul></details>
     </section>
@@ -288,7 +292,7 @@ details > :not(summary){margin-top:10px}
         <div class="head"><h3 id="mLabel"></h3><span class="num note" id="mText"></span></div>
         <div id="chartCard" style="display:grid;gap:10px">
           <div class="chart" id="chart" role="img"></div>
-          <div class="axis"><span>أول الشهر</span><span>الفاتح = ميزانية اليوم</span><span>آخره</span></div>
+          <div class="axis"><span>أول الشهر</span><span>العمود الفاتح: ميزانية اليوم</span><span>آخر الشهر</span></div>
         </div>
         <p class="note" id="mHint"></p>
         <div id="insCard" style="display:grid;gap:12px">
@@ -298,21 +302,21 @@ details > :not(summary){margin-top:10px}
       </section>
       </div>
     <section class="month" id="topCard" hidden>
-      <h3>وين يروح صرفك هالشهر</h3>
+      <h3>توزيع المصروفات هذا الشهر</h3>
       <ul class="places" id="top"></ul>
     </section>
-      <p class="note" id="noStats" hidden>الإحصائيات تطلع لما تبدأ الخطة شهرها.</p>
+      <p class="note" id="noStats" hidden>تظهر الإحصائيات عند بدء الخطة لشهرها.</p>
     </div>
 
     <div data-tab="tools" class="stack">
     <section class="panel calc">
       <h3>حاسبات</h3>
-      <details open><summary>أقدر أشتريها؟</summary>
+      <details open><summary>هل أستطيع شراءه؟</summary>
         <div class="row"><input id="buyAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="السعر"></div>
         <ul id="buyOut"></ul>
       </details>
       <details><summary>هدف ادخار</summary>
-        <div class="row"><input id="goalAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ"><input id="goalDate" class="grow" type="date" aria-label="متى تبيه"></div>
+        <div class="row"><input id="goalAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ"><input id="goalDate" class="grow" type="date" aria-label="تاريخ الهدف"></div>
         <ul id="goalOut"></ul>
       </details>
     </section>
@@ -321,7 +325,7 @@ details > :not(summary){margin-top:10px}
       <h3>السجل</h3>
       <details id="monthsCard" hidden><summary>الشهور الماضية</summary><ul id="months"></ul></details>
       <details id="pastCard" hidden><summary>آخر الأيام</summary><ul id="past"></ul></details>
-      <button class="ghost sm" id="exportBtn" style="justify-self:start">نزّل كل المصروفات (Excel)</button>
+      <button class="ghost sm" id="exportBtn" style="justify-self:start">تصدير المصروفات (Excel)</button>
     </section>
     </div>
   </div>
@@ -329,14 +333,14 @@ details > :not(summary){margin-top:10px}
   <!-- محرر الخطة -->
   <section class="panel" id="editor" hidden>
     <div class="head"><h2 id="edTitle"></h2><button class="ghost sm" id="edCancel">رجوع</button></div>
-    <label style="display:grid;gap:6px" for="edName">اسم الخطة<input id="edName" placeholder="مثلاً: مصروفي، أخوي فهد"></label>
+    <label style="display:grid;gap:6px" for="edName">اسم الخطة<input id="edName" placeholder="مثال: مصروفي الشخصي"></label>
     <h3>ميزانية كل يوم</h3>
     <div class="wk" id="week"></div>
     <div class="spread num wkt" id="weekTot"></div>
-    <label class="check"><input type="checkbox" id="edRep"> عامة: تتجدد كل شهر وتنحفظ الشهور اللي فاتت</label>
+    <label class="check"><input type="checkbox" id="edRep"> خطة دائمة: تتجدد كل شهر وتُحفظ الشهور السابقة</label>
     <p class="note" id="edRepNote"></p>
     <p class="warn" id="edWarn"></p>
-    <div class="row"><button id="edSave">احفظ</button><button class="ghost" id="edDel" hidden>احذف الخطة</button></div>
+    <div class="row"><button id="edSave">حفظ</button><button class="ghost" id="edDel" hidden>حذف الخطة</button></div>
   </section>
 
   <div class="status" id="status">جاري التحميل…</div>
@@ -409,12 +413,12 @@ function render(){
 function renderHome(){
   renderSync();
   const box = $('wallets'); box.innerHTML = '';
-  if (!S.wallets.length) box.innerHTML = '<p class="note">ما عندك خطط. سوّ خطة لك أو لأحد ثاني، وحدد ميزانية كل يوم فيها.</p>';
+  if (!S.wallets.length) box.innerHTML = '<p class="note">لا توجد خطط بعد. أنشئ خطة وحدّد ميزانية كل يوم.</p>';
   S.wallets.forEach(w=>{
     const b = document.createElement('button'); b.className = 'wcard';
     const on = active(w, TODAY), left = eff(w, TODAY) - spent(w, TODAY);
     b.innerHTML = `<span class="top"><span class="nm"></span><span class="chip b num">الصندوق ${fmt(boxBalance(w))}</span></span>
-      <span class="note num">${on ? `باقي اليوم ${fmt(left)} من ${fmt(eff(w, TODAY))} ر.س` : 'الخطة خلصت مع نهاية شهرها'}</span>`;
+      <span class="note num">${on ? `المتبقي اليوم ${fmt(left)} من ${fmt(eff(w, TODAY))} ر.س` : 'انتهت الخطة بانتهاء شهرها'}</span>`;
     b.style.setProperty('--left', on && eff(w, TODAY) > 0 ? Math.max(0, Math.min(1, left/eff(w, TODAY))) : 0);
     b.classList.toggle('over', on && left < 0);
     b.querySelector('.nm').textContent = w.name;
@@ -430,10 +434,10 @@ function renderWallet(){
 
   if (on) {
     const m = monthTotals(w, MONTH), daysLeft = daysIn(MONTH) - NOW.getDate() + 1;
-    $('mLabel').textContent = monthName(MONTH) + (w.rep ? '' : ' (هالشهر بس)');
+    $('mLabel').textContent = monthName(MONTH) + (w.rep ? '' : ' (هذا الشهر فقط)');
     $('mText').textContent = `${fmt(m.sp)} من ${fmt(m.total)} ر.س`;
-    $('mHint').textContent = (m.sp > m.total ? `تعدّيت مجموع الشهر بـ ${fmt(m.sp-m.total)} ر.س` : `باقي ${fmt(m.total-m.sp)} ر.س لآخر الشهر (${daysLeft} يوم)`)
-      + (m.dep ? `. منها ${fmt(m.dep)} أضفتها للصندوق` : '');
+    $('mHint').textContent = (m.sp > m.total ? `تجاوزت ميزانية الشهر بمقدار ${fmt(m.sp-m.total)} ر.س` : `المتبقي ${fmt(m.total-m.sp)} ر.س حتى نهاية الشهر، والأيام المتبقية ${daysLeft}`)
+      + (m.dep ? `، منها ${fmt(m.dep)} ر.س أودعتها في الصندوق` : '');
 
     const e = eff(w, TODAY), s = spent(w, TODAY), left = e - s;
     $('dayName').textContent = DOW[NOW.getDay()];
@@ -442,7 +446,7 @@ function renderWallet(){
     $('hero').style.setProperty('--left', r);
     $('hero').classList.toggle('over', left < 0);
     $('hero').classList.toggle('low', left >= 0 && r < .25);
-    $('dSpent').textContent = `صرفت ${fmt(s)}`;
+    $('dSpent').textContent = `المصروف ${fmt(s)}`;
     $('dBudget').textContent = `الميزانية ${fmt(budget(w, TODAY))}` + (pulled(w, TODAY) ? ` + ${fmt(pulled(w, TODAY))} من الصندوق` : '');
     const xs = w.days[TODAY]?.x || [];
     $('expList').innerHTML = '';
@@ -472,7 +476,7 @@ function renderWallet(){
   $('months').innerHTML = '';
   ms.forEach(m=>{
     const t = monthTotals(w, m), l = t.total - t.sp, li = document.createElement('li');
-    li.innerHTML = `<span class="pm">${monthName(m)}</span><span class="num">${fmt(t.sp)} / ${fmt(t.total)}</span><span class="chip ${l<0?'':'b'} num">${l<0?'عجز ':'وفّرت '}${fmt(Math.abs(l))}</span>`;
+    li.innerHTML = `<span class="pm">${monthName(m)}</span><span class="num">${fmt(t.sp)} / ${fmt(t.total)}</span><span class="chip ${l<0?'':'b'} num">${l<0?'عجز ':'توفير '}${fmt(Math.abs(l))}</span>`;
     $('months').append(li);
   });
 
@@ -505,10 +509,10 @@ function renderInsights(w, on){
     const sp = passed.reduce((s,k)=>s+spent(w,k),0), avg = sp/passed.length, proj = avg*act, perDay = (m.total-m.sp)/daysLeft;
     let streak = 0; for (const k of closedDays(w).reverse()) { if (eff(w,k) - spent(w,k) >= 0) streak++; else break; }
     const tiles = [
-      ['متوسط صرفك باليوم', fmt(Math.round(avg)), `ميزانيتك المتوسطة ${fmt(Math.round(weekAvg(w)))}`, avg > weekAvg(w)],
-      ['عشان تلتزم لا تتعدى باليوم', fmt(Math.max(0, Math.floor(perDay))), `لين آخر الشهر (${daysLeft} يوم)`, perDay < 0],
-      passed.length >= 3 && ['بهالمعدل الشهر بيخلص على', fmt(Math.round(proj)), proj > m.total ? `زيادة ${fmt(Math.round(proj-m.total))} عن المجموع` : `توفير ${fmt(Math.round(m.total-proj))}`, proj > m.total],
-      ['أيام التزام ورا بعض', streak, streak ? 'ما تعدّيت فيها ميزانية اليوم' : 'ابدأ السلسلة من اليوم'],
+      ['متوسط المصروف اليومي', fmt(Math.round(avg)), `متوسط الميزانية ${fmt(Math.round(weekAvg(w)))}`, avg > weekAvg(w)],
+      ['الحد اليومي للالتزام', fmt(Math.max(0, Math.floor(perDay))), `حتى نهاية الشهر`, perDay < 0],
+      passed.length >= 3 && ['المتوقع بنهاية الشهر', fmt(Math.round(proj)), proj > m.total ? `بزيادة ${fmt(Math.round(proj-m.total))} عن الميزانية` : `بتوفير ${fmt(Math.round(m.total-proj))}`, proj > m.total],
+      ['أيام الالتزام المتتالية', streak, streak ? 'دون تجاوز ميزانية اليوم' : 'تبدأ السلسلة من اليوم'],
     ].filter(Boolean);
     $('stats').innerHTML = tiles.map(([l,v,n,bad]) => `<div class="st${bad?' bad':''}"><span class="label">${l}</span><b class="num">${v}</b><small class="num">${n}</small></div>`).join('');
     const cd = closedDays(w);
@@ -517,7 +521,7 @@ function renderInsights(w, on){
       const s = Array(7).fill(0), c = Array(7).fill(0);
       cd.forEach(k => { const d = dowOf(k); s[d] += spent(w,k); c[d]++; });
       const av = s.map((x,i) => c[i] ? x/c[i] : -1), hi = av.indexOf(Math.max(...av));
-      t = `أكثر يوم تصرف فيه ${DOW[hi]}، بمتوسط ${fmt(Math.round(av[hi]))} ر.س وميزانيته ${fmt(w.w[hi])}.`;
+      t = `أعلى أيام الأسبوع إنفاقاً ${DOW[hi]}، بمتوسط ${fmt(Math.round(av[hi]))} ر.س مقابل ميزانية ${fmt(w.w[hi])} ر.س.`;
     }
     $('insNote').textContent = t;
   }
@@ -526,7 +530,7 @@ function renderInsights(w, on){
   for (let i = 1; i <= daysIn(MONTH); i++) { const k = MONTH+'-'+pad(i); vals.push({k, s: spent(w,k), b: active(w,k) ? eff(w,k) : 0}); }
   const mx = Math.max(1, ...vals.map(v => Math.max(v.s, v.b)));
   $('chartCard').hidden = !vals.some(v => v.s || v.b);
-  $('chart').setAttribute('aria-label', 'صرف كل يوم هالشهر: ' + vals.filter(v => v.k <= TODAY).map(v => fmt(v.s)).join('، '));
+  $('chart').setAttribute('aria-label', 'المصروف اليومي هذا الشهر: ' + vals.filter(v => v.k <= TODAY).map(v => fmt(v.s)).join('، '));
   $('chart').innerHTML = vals.map(v => `<div class="${v.k > TODAY ? 'f' : v.k === TODAY ? 't' : ''}${!v.b && !v.s ? ' n' : ''}" title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}">${v.b ? `<b style="height:${v.b/mx*100}%"></b>` : ''}<i class="${v.s > v.b ? 'over' : ''}" style="height:${v.k > TODAY ? 0 : v.s/mx*100}%"></i></div>`).join('');
   // وين يروح الصرف: يجمع حسب الوصف
   const g = {};
@@ -539,7 +543,7 @@ function renderInsights(w, on){
   top.forEach(([n,v]) => {
     const li = document.createElement('li');
     li.style.setProperty('--p', v.a/top[0][1].a);
-    li.innerHTML = `<span><span></span> <span class="note num">${v.c} مرة</span></span><span class="num">${fmt(v.a)} <small class="note">${Math.round(v.a/tot*100)}%</small></span>`;
+    li.innerHTML = `<span><span></span> <span class="note num">عمليات: ${v.c}</span></span><span class="num">${fmt(v.a)} <small class="note">${Math.round(v.a/tot*100)}%</small></span>`;
     li.querySelector('span span').textContent = n;
     $('top').append(li);
   });
@@ -550,21 +554,21 @@ function calcBuy(){
   if (!w || !(a > 0)) return lines($('buyOut'), []);
   const m = monthTotals(w, MONTH), dl = daysIn(MONTH) - NOW.getDate() + 1, box = boxBalance(w), sv = avgSave(w), wa = weekAvg(w), left = m.total - m.sp;
   lines($('buyOut'), [
-    wa && `تساوي ${fmt(Math.round(a/wa*10)/10)} يوم من ميزانيتك.`,
-    box >= a ? `الصندوق يغطيها، فيه ${fmt(box)} ويبقى ${fmt(box-a)}.` : `الصندوق فيه ${fmt(Math.max(0,box))}، ناقصك ${fmt(a-Math.max(0,box))}.`,
-    active(w, TODAY) && `لو حسبتها على الشهر يصير مسموحك باليوم ${fmt(Math.max(0,Math.floor((left-a)/dl)))} بدل ${fmt(Math.max(0,Math.floor(left/dl)))}.`,
-    box < a && sv > 0 && `بمعدل توفيرك (${fmt(Math.round(sv))} باليوم) تجمع الناقص خلال ${Math.ceil((a-Math.max(0,box))/sv)} يوم.`,
+    wa && `تعادل ميزانية ${fmt(Math.round(a/wa*10)/10)} يوم.`,
+    box >= a ? `يغطيها الصندوق، إذ يبلغ رصيده ${fmt(box)} ويتبقى ${fmt(box-a)}.` : `رصيد الصندوق ${fmt(Math.max(0,box))}، ويلزمك ${fmt(a-Math.max(0,box))} إضافية.`,
+    active(w, TODAY) && `إذا احتُسبت على الشهر يصبح الحد اليومي ${fmt(Math.max(0,Math.floor((left-a)/dl)))} بدلاً من ${fmt(Math.max(0,Math.floor(left/dl)))}.`,
+    box < a && sv > 0 && `بمعدل توفيرك الحالي (${fmt(Math.round(sv))} يومياً) تجمع المبلغ المتبقي خلال ${Math.ceil((a-Math.max(0,box))/sv)} يوم.`,
   ]);
 }
 function calcGoal(){
   const w = W, a = +$('goalAmt').value, d = $('goalDate').value;
   if (!w || !(a > 0) || !d) return lines($('goalOut'), []);
   const days = Math.round((new Date(d+'T12:00') - new Date(TODAY+'T12:00')) / 864e5);
-  if (days <= 0) return lines($('goalOut'), ['اختر تاريخ بعد اليوم.']);
+  if (days <= 0) return lines($('goalOut'), ['اختر تاريخاً لاحقاً لليوم.']);
   const need = Math.max(0, a - Math.max(0, boxBalance(w))) / days, sv = avgSave(w);
   lines($('goalOut'), [
-    need ? `تحتاج يروح للصندوق ${fmt(need)} ر.س باليوم لمدة ${days} يوم.` : 'الصندوق فيه المبلغ من الحين ✓',
-    need && sv != null && (sv >= need ? `توفيرك الحالي ${fmt(Math.round(sv))} باليوم يكفي ✓` : `توفيرك الحالي ${fmt(Math.round(sv))} باليوم، ناقصك ${fmt(need-sv)} باليوم.`),
+    need ? `يلزمك إيداع ${fmt(need)} ر.س يومياً في الصندوق لمدة ${days} يوم.` : 'رصيد الصندوق يغطي المبلغ ✓',
+    need && sv != null && (sv >= need ? `توفيرك الحالي (${fmt(Math.round(sv))} يومياً) كافٍ ✓` : `توفيرك الحالي ${fmt(Math.round(sv))} يومياً، ويلزمك ${fmt(need-sv)} إضافية يومياً.`),
   ]);
 }
 $('buyAmt').oninput = calcBuy;
@@ -590,7 +594,7 @@ function edTotals(){
   let mt = 0;
   for (let i = 1; i <= daysIn(MONTH); i++) mt += w[new Date(NOW.getFullYear(), NOW.getMonth(), i).getDay()];
   $('weekTot').innerHTML = `<span>الأسبوع ${fmt(w.reduce((a,b)=>a+b,0))}</span><span>الشهر تقريباً ${fmt(mt)} ر.س</span>`;
-  $('edRepNote').textContent = $('edRep').checked ? 'كل شهر يبدأ من جديد، والشهور اللي خلصت تنحفظ في سجل الخطة.' : `الخطة تشتغل لين نهاية ${monthName(MONTH)} بس.`;
+  $('edRepNote').textContent = $('edRep').checked ? 'يبدأ كل شهر من جديد، وتُحفظ الشهور المنتهية في سجل الخطة.' : `تعمل الخطة حتى نهاية ${monthName(MONTH)} فقط.`;
 }
 $('edRep').onchange = edTotals;
 function openEditor(fresh){
@@ -600,7 +604,7 @@ function openEditor(fresh){
   $('edName').value = w ? w.name : '';
   DOW.forEach((_,i)=> $('w'+i).value = w ? w.w[i] : '');
   $('edRep').checked = w ? (w.rep || !active(w, TODAY)) : true;
-  $('edDel').hidden = fresh; $('edDel').textContent = 'احذف الخطة'; sure = null;
+  $('edDel').hidden = fresh; $('edDel').textContent = 'حذف الخطة'; sure = null;
   $('edWarn').textContent = '';
   edTotals(); go('editor');
 }
@@ -608,8 +612,8 @@ $('edCancel').onclick = () => go(ed.fresh ? 'home' : 'wallet');
 $('edSave').onclick = () => {
   const warn = t => $('edWarn').textContent = t;
   const name = $('edName').value.trim(), wk = DOW.map((_,i)=> +$('w'+i).value || 0);
-  if (!name) return warn('اكتب اسم للخطة');
-  if (!wk.some(Boolean)) return warn('حط ميزانية ليوم واحد على الأقل');
+  if (!name) return warn('أدخل اسماً للخطة');
+  if (!wk.some(Boolean)) return warn('حدّد ميزانية ليوم واحد على الأقل');
   if (ed.fresh) { W = {id: Date.now().toString(36), from: TODAY, days:{}, box:[]}; S.wallets.push(W); }
   const rep = $('edRep').checked;
   // خطة خلصت وتجدّدت: تبدأ من اليوم عشان الأيام اللي بينهم ما تنحسب
@@ -619,16 +623,36 @@ $('edSave').onclick = () => {
 };
 let sure = null; // زر يحتاج ضغطتين
 function twice(btn, label, fn){
-  if (sure !== btn) { sure = btn; btn.textContent = 'متأكد؟ اضغط مرة ثانية'; return; }
+  if (sure !== btn) { sure = btn; btn.textContent = 'للتأكيد، اضغط مرة أخرى'; return; }
   sure = null; btn.textContent = label; fn();
 }
-$('edDel').onclick = () => twice($('edDel'), 'احذف الخطة', () => {
+$('edDel').onclick = () => twice($('edDel'), 'حذف الخطة', () => {
   S.wallets = S.wallets.filter(w => w !== W); W = null; ed = {}; go('home'); change();
 });
 
 // ---- أزرار ----
 $('addWallet').onclick = () => openEditor(true);
 $('toHome').onclick = () => { W = null; go('home'); };
+// المظهر: تلقائي حسب الجهاز، ثم فاتح، ثم داكن
+const ico = d => `<svg class="ico" viewBox="0 0 24 24">${d}</svg>`;
+const THEMES = {
+  auto: ['تلقائي', ico('<path d="M12 2v2"/><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="m19 5-1.256 1.256"/><path d="M20 12h2"/>')],
+  light: ['فاتح', ico('<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>')],
+  dark: ['داكن', ico('<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>')],
+};
+function setTheme(t){
+  if (!THEMES[t]) t = 'auto';
+  if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  const [label, icon] = THEMES[t];
+  $('themeBtn').innerHTML = icon + `<span>${label}</span>`;
+  $('themeBtn').setAttribute('aria-label', 'المظهر: ' + label);
+  const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelectorAll('meta[name=theme-color]').forEach(m => m.content = dark ? '#13102A' : '#F2F0FA');
+  try { localStorage.setItem('masroofi_theme', t); } catch {}
+}
+let theme = 'auto'; try { theme = localStorage.getItem('masroofi_theme') || 'auto'; } catch {}
+setTheme(theme);
+$('themeBtn').onclick = () => { const order = ['auto','light','dark']; theme = order[(order.indexOf(theme)+1) % 3]; setTheme(theme); };
 // أقسام الخطة: كل ما تدخل الخطة تفتح على «اليوم»
 function showTab(t){
   document.querySelectorAll('[data-tab]').forEach(e => e.hidden = e.dataset.tab !== t);
@@ -647,9 +671,9 @@ $('expForm').onsubmit = ev => {
 };
 function boxMove(k){
   const a = +$('boxAmt').value; $('boxWarn').textContent = '';
-  if (!(a > 0)) { $('boxWarn').textContent = 'اكتب المبلغ أول'; return; }
-  if (k==='pull' && !active(W, TODAY)) { $('boxWarn').textContent = 'جدّد الخطة أول'; return; }
-  if (k==='pull' && a > boxBalance(W)) { $('boxWarn').textContent = `الصندوق فيه ${fmt(boxBalance(W))} بس`; return; }
+  if (!(a > 0)) { $('boxWarn').textContent = 'أدخل المبلغ أولاً'; return; }
+  if (k==='pull' && !active(W, TODAY)) { $('boxWarn').textContent = 'جدّد الخطة أولاً'; return; }
+  if (k==='pull' && a > boxBalance(W)) { $('boxWarn').textContent = `رصيد الصندوق ${fmt(boxBalance(W))} فقط`; return; }
   W.box.push({k, a, d:TODAY}); $('boxAmt').value = ''; change();
 }
 $('pull').onclick = () => boxMove('pull');
@@ -702,7 +726,7 @@ function renderSync(){
   $('review').innerHTML = '';
   rv.forEach((it,i)=>{
     const li = document.createElement('li');
-    li.innerHTML = `<span><span class="num">${fmt(it.a)}</span> <span class="note"></span> <span class="note num">${it.d.slice(5).replace('-','/')}</span></span><span class="row"><button class="ghost">احسبها</button><button class="x" aria-label="تجاهل">×</button></span>`;
+    li.innerHTML = `<span><span class="num">${fmt(it.a)}</span> <span class="note"></span> <span class="note num">${it.d.slice(5).replace('-','/')}</span></span><span class="row"><button class="ghost sm">احتساب</button><button class="x" aria-label="تجاهل">×</button></span>`;
     li.querySelector('.note').textContent = it.n;
     const [yes, no] = li.querySelectorAll('button');
     yes.onclick = () => { const w = S.wallets.find(w=>w.id===S.target) || S.wallets[0]; if (!w) return; addExp(w, it); rv.splice(i,1); change(); };
@@ -720,8 +744,8 @@ function renderSync(){
 $('target').onchange = () => { S.target = $('target').value; change(); };
 $('ignore').onchange = () => { S.ignore = $('ignore').value; change(); };
 const copy = (id, btn) => async () => {
-  try { await navigator.clipboard.writeText($(id).value); btn.textContent = 'انتسخ'; }
-  catch { $(id).select(); btn.textContent = 'انسخه يدوي'; }
+  try { await navigator.clipboard.writeText($(id).value); btn.textContent = 'تم النسخ'; }
+  catch { $(id).select(); btn.textContent = 'انسخه يدوياً'; }
 };
 $('copyHook').onclick = copy('hookUrl', $('copyHook'));
 $('copyDev').onclick = copy('devUrl', $('copyDev'));
@@ -729,7 +753,7 @@ $('copyDev').onclick = copy('devUrl', $('copyDev'));
 const SHORTCUT = 'https://www.icloud.com/shortcuts/92161ee164f0469b9be519fbe740d2ec';
 $('linkBtn').onclick = async () => {
   try { await navigator.clipboard.writeText($('hookUrl').value); } catch {}
-  if (SHORTCUT) location.href = SHORTCUT; else $('linkBtn').textContent = 'انتسخ رابطك، الاختصار جاي قريب';
+  if (SHORTCUT) location.href = SHORTCUT; else $('linkBtn').textContent = 'تم نسخ الرابط';
 };
 
 // ---- الحفظ ----
@@ -745,7 +769,7 @@ async function save(){
     if (ref) await ref.set(JSON.parse(sent)); else await fb.child('state').set(sent);
     if (JSON.stringify(S) === sent) dirty = false; // لو تغيّر شي أثناء الحفظ يتحفظ بالدورة الجاية
     $('status').textContent = 'محفوظ';
-  } catch (e) { $('status').textContent = 'ما انحفظ: ' + (e?.code || 'تأكد من الاتصال'); }
+  } catch (e) { $('status').textContent = 'تعذّر الحفظ: ' + (e?.code || 'تحقق من الاتصال'); }
 }
 // تحويل الصيغ القديمة (خطط بالشهور) للصيغة الجديدة
 function migrate(data){
@@ -789,7 +813,7 @@ function startFirebase(){
     if (first) { first = false; fb.child('inbox').on('child_added', async m => {
       applySms(m.val()?.raw); change(); await save(); m.ref.remove();
     }); }
-  }, e => $('status').textContent = 'ما قدرت أوصل للحفظ: ' + e.code);
+  }, e => $('status').textContent = 'تعذّر الاتصال بالحفظ: ' + e.code);
   // iOS يوقف الاتصال لما التطبيق يروح بالخلفية؛ نعيد الاتصال كل ما رجعت له
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') { firebase.database().goOffline(); firebase.database().goOnline(); }
@@ -803,15 +827,15 @@ try { load(JSON.parse(localStorage.getItem('masroofi'))); } catch { load(); }
   const id = user && await user.id();
   if (!db || !id) {
     if (window.firebase && startFirebase()) return;
-    $('status').textContent = 'محفوظ على هالجهاز بس'; return;
+    $('status').textContent = 'محفوظ على هذا الجهاز فقط'; return;
   }
   ref = db.collection('data/users/'+id).doc('state');
-  const t = setTimeout(()=> $('status').textContent = 'الاتصال بطيء، تقدر تكمل وبيحفظ', 10000);
+  const t = setTimeout(()=> $('status').textContent = 'الاتصال بطيء، ويمكنك المتابعة وسيتم الحفظ', 10000);
   ref.onSnapshot(snap => {
     clearTimeout(t);
     if (snap.metadata.hasPendingWrites || dirty) return; // لا ترجّع نسخة السيرفر فوق تعديل ما انحفظ
     if (snap.exists) load(snap.data()); else save();
     $('status').textContent = 'محفوظ على حسابك';
-  }, () => { clearTimeout(t); $('status').textContent = 'ما قدرت أوصل للحفظ، البيانات على هالجهاز'; });
+  }, () => { clearTimeout(t); $('status').textContent = 'تعذّر الاتصال بالحفظ، والبيانات محفوظة على هذا الجهاز'; });
 })();
 </script>
