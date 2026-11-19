@@ -1,0 +1,420 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1F6F54"><meta name="apple-mobile-web-app-capable" content="yes"></head><body>
+<title>مصروفي اليومي</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Readex+Pro:wght@500;700&display=swap">
+<style>
+/* layout: عمود واحد بعرض الجوال؛ بطاقة اليوم فوق، الخطة الأسبوعية تحتها، والصندوق بعدها */
+:root{
+  --bg:#EEF2F0; --card:#FFFFFF; --ink:#13241E; --mute:#5E6F68; --line:#D5DED9;
+  --acc:#1F6F54; --acc-soft:#DCEDE5; --box:#B7791F; --box-soft:#F6EAD3; --bad:#C0392B;
+  --f-body:"IBM Plex Sans Arabic",system-ui,sans-serif; --f-num:"Readex Pro","IBM Plex Sans Arabic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1714; --card:#17221E; --ink:#E6EEEA; --mute:#93A49C; --line:#2A3832;
+  --acc:#4FBF92; --acc-soft:#1D3A2F; --box:#E3A94B; --box-soft:#3A2E18; --bad:#EF6B5B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1714; --card:#17221E; --ink:#E6EEEA; --mute:#93A49C; --line:#2A3832;
+  --acc:#4FBF92; --acc-soft:#1D3A2F; --box:#E3A94B; --box-soft:#3A2E18; --bad:#EF6B5B; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--f-body);direction:rtl;padding-inline:16px;padding-block:20px 40px}
+main{max-width:460px;margin:0 auto;display:grid;gap:14px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:baseline}
+h1{font:700 20px var(--f-num);margin:0}
+.date{color:var(--mute);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+.label{font-size:12px;color:var(--mute);letter-spacing:.02em}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
+.bar.over i{background:var(--bad)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.big{font:700 44px/1 var(--f-num)}
+.big small{font-size:16px;color:var(--mute);font-weight:500;margin-inline-start:4px}
+.neg{color:var(--bad)}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input.amt{width:110px;font-family:var(--f-num)}
+input.grow{flex:1}
+button{font:500 14px var(--f-body);border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--acc);color:var(--card)}
+button.ghost{background:transparent;color:var(--acc);border:1px solid var(--line)}
+button.boxbtn{background:var(--box);color:var(--card)}
+button.x{background:none;color:var(--mute);padding:4px 8px;font-size:18px;line-height:1}
+ul{list-style:none;margin:0;padding:0;display:grid}
+li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+.note{color:var(--mute);font-size:13px}
+.box{background:var(--box-soft);border-color:transparent}
+.box .big{color:var(--box)}
+.chip{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--acc-soft);color:var(--acc)}
+.chip.b{background:var(--box-soft);color:var(--box)}
+.warn{color:var(--bad);font-size:13px}
+.status{font-size:12px;color:var(--mute);text-align:center}
+.wk{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
+.wk .h{font-size:11px;color:var(--mute)}
+.wk .d{font-weight:500}.wk .d small{display:block;font-size:11px;color:var(--mute);font-weight:400}
+.wk input{width:84px;padding:6px 8px;font-family:var(--f-num)}
+.wk .on{color:var(--acc);font-weight:700}
+.wk .past{color:var(--mute)}
+.wkt{border-top:1px solid var(--line);padding-top:10px;font-weight:500}
+details summary{cursor:pointer;color:var(--mute);font-size:13px}
+.plans li{cursor:pointer}
+.plans li:hover .pm{color:var(--acc)}
+.pm{font-weight:700}
+.check{display:flex;gap:8px;align-items:center}
+.check input{width:18px;height:18px;accent-color:var(--acc)}
+.empty{text-align:center;justify-items:center}
+[hidden]{display:none!important}
+.wl{display:grid;gap:10px}
+.wcard{text-align:start;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:6px;width:100%}
+.wcard:hover{border-color:var(--acc)}
+.wcard .nm{font:700 17px var(--f-num)}
+.back{background:none;color:var(--acc);padding:4px 0;font-weight:500}
+h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
+</style>
+
+<main>
+  <header><h1>مصروفي</h1><span class="date" id="today"></span></header>
+
+  <!-- الرئيسية: كل الخطط -->
+  <div id="homeV" style="display:contents">
+    <section class="card">
+      <div class="spread"><span class="label">خططي</span><button class="ghost" id="addWallet">+ خطة جديدة</button></div>
+      <div class="wl" id="wallets"></div>
+    </section>
+  </div>
+
+  <!-- صفحة خطة -->
+  <div id="walletV" style="display:contents" hidden>
+    <div class="spread"><button class="back" id="toHome">→ كل الخطط</button></div>
+    <h2 id="wName"></h2>
+
+    <section class="card empty" id="noPlan" hidden>
+      <span class="label">ما فيه ميزانية لهالشهر</span>
+      <span class="note">ما يبدأ الحساب إلا لما تحدد ميزانية الشهر.</span>
+      <button id="addNow">حدد ميزانية الشهر</button>
+    </section>
+
+    <div id="active" style="display:contents" hidden>
+      <section class="card">
+        <div class="spread"><span class="label" id="mLabel"></span><span class="note num" id="mText"></span></div>
+        <div class="bar" id="mBarW"><i id="mBar"></i></div>
+        <div class="note" id="mHint"></div>
+      </section>
+
+      <section class="card">
+        <div class="spread"><span class="label">باقي اليوم</span><span class="chip" id="dayName"></span></div>
+        <div class="big num" id="left"></div>
+        <div class="bar" id="dBarW"><i id="dBar"></i></div>
+        <div class="spread note num"><span id="dSpent"></span><span id="dBudget"></span></div>
+        <form class="row" id="expForm">
+          <input id="expAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ" required>
+          <input id="expNote" class="grow" placeholder="على إيش؟">
+          <button>صرفت</button>
+        </form>
+        <ul id="expList"></ul>
+      </section>
+    </div>
+
+    <section class="card box">
+      <div class="spread"><span class="label">صندوق هالخطة</span><span class="chip b">يتجمّع من باقي كل يوم</span></div>
+      <div class="big num" id="boxBal"></div>
+      <div class="row">
+        <input id="boxAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ">
+        <button class="boxbtn" id="pull">اسحب لليوم</button>
+        <button class="ghost" id="dep">أضف للصندوق</button>
+      </div>
+      <div class="warn" id="boxWarn"></div>
+      <details><summary>حركة الصندوق</summary><ul id="boxList"></ul></details>
+    </section>
+
+    <section class="card">
+      <div class="spread"><span class="label">ميزانيات الشهور</span><button class="ghost" id="addMonth">+ شهر</button></div>
+      <ul class="plans" id="plans"></ul>
+    </section>
+
+    <section class="card" id="pastCard" hidden>
+      <span class="label">الأيام الماضية</span>
+      <ul id="past"></ul>
+    </section>
+
+    <section class="card">
+      <span class="label">إعدادات الخطة</span>
+      <div class="row"><input id="renameIn" class="grow" aria-label="اسم الخطة"><button class="ghost" id="renameBtn">غيّر الاسم</button></div>
+      <button class="ghost" id="delWallet">احذف الخطة كاملة</button>
+    </section>
+  </div>
+
+  <!-- محرر ميزانية شهر (ومعه الاسم لو خطة جديدة) -->
+  <section class="card" id="editor" hidden>
+    <div class="spread"><span class="label" id="edTitle"></span><button class="ghost" id="edCancel">رجوع</button></div>
+    <div class="spread" id="edNameRow"><label for="edName">اسم الخطة</label><input id="edName" class="grow" placeholder="مثلاً: مصروفي، أخوي فهد"></div>
+    <div class="spread"><label for="edMonth">الشهر</label><input id="edMonth" type="month"></div>
+    <span class="label">ميزانية كل يوم</span>
+    <div class="wk" id="week"></div>
+    <div class="spread num wkt" id="weekTot"></div>
+    <label class="check"><input type="checkbox" id="edRepeat"> طبّقها على الشهور اللي بعده</label>
+    <div class="warn" id="edWarn"></div>
+    <div class="row"><button id="edSave">احفظ</button><button class="ghost" id="edDel" hidden>احذف ميزانية الشهر</button></div>
+  </section>
+
+  <div class="status" id="status">جاري التحميل…</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US');
+const key = d => d.toLocaleDateString('en-CA'); // YYYY-MM-DD بالتوقيت المحلي
+const NOW = new Date(), TODAY = key(NOW), MONTH = TODAY.slice(0,7);
+const DOW = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const AR = 'ar-SA-u-ca-gregory-nu-latn';
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const dowOf = k => new Date(k+'T12:00').getDay();
+const monthName = m => new Date(m+'-15T12:00').toLocaleDateString(AR,{month:'long',year:'numeric'});
+const daysIn = m => new Date(+m.slice(0,4), +m.slice(5,7), 0).getDate();
+
+// S.wallets: [{id, name, plans:{"2026-12":{w:[7 من الأحد], rep, from}}, days:{k:{b,x:[]}}, box:[]}]
+const DEF = {wallets:[]};
+let S = structuredClone(DEF), W = null; // W = الخطة المفتوحة
+let ref = null, saveT = null, dirty = false; // dirty: فيه تعديل محلي ما وصل للحفظ
+
+// ---- الحسابات (كلها على خطة وحدة) ----
+function planFor(w, m){
+  if (w.plans[m]) return w.plans[m];
+  const prev = Object.keys(w.plans).filter(x => x < m && w.plans[x].rep).sort().pop();
+  return prev ? w.plans[prev] : null;
+}
+function planBudget(w, k){ const p = planFor(w, k.slice(0,7)); return p && k >= p.from ? p.w[dowOf(k)] : 0; }
+const active = (w, k) => { const p = planFor(w, k.slice(0,7)); return !!p && k >= p.from; };
+const spent = (w, k) => (w.days[k]?.x||[]).reduce((s,e)=>s+e.a,0);
+const pulled = (w, k) => w.box.filter(b=>b.k==='pull' && b.d===k).reduce((s,b)=>s+b.a,0);
+const budget = (w, k) => w.days[k]?.b ?? planBudget(w, k); // الأيام الماضية مثبّتة
+const eff = (w, k) => budget(w, k) + pulled(w, k);
+// يثبّت ميزانية الأيام اللي خلصت عشان تعديل الخطة ما يغيّر الماضي
+function closeDays(w){
+  const froms = Object.values(w.plans).map(p=>p.from).sort();
+  if (!froms.length) return;
+  for (let d = new Date(froms[0]+'T12:00'); key(d) < TODAY; d = addDays(d,1)) {
+    const k = key(d);
+    if (!active(w, k)) continue;
+    w.days[k] = w.days[k] || {x:[]};
+    if (w.days[k].b == null) w.days[k].b = planBudget(w, k);
+  }
+}
+function boxBalance(w){
+  let bal = 0;
+  for (const k in w.days) if (k < TODAY && w.days[k].b != null) bal += eff(w, k) - spent(w, k);
+  for (const b of w.box) bal += b.k==='dep' ? b.a : -b.a;
+  return bal;
+}
+function monthTotals(w, m){
+  let sp = 0, plan = 0;
+  for (let i = 1; i <= daysIn(m); i++) { const k = m+'-'+String(i).padStart(2,'0'); sp += spent(w, k); plan += budget(w, k); }
+  return {sp, plan};
+}
+
+// ---- التنقّل ----
+function show(v){ $('homeV').hidden = v!=='home'; $('walletV').hidden = v!=='wallet'; $('editor').hidden = v!=='editor'; scrollTo(0,0); }
+let view = 'home';
+function go(v){ view = v; show(v); render(); }
+
+// ---- العرض ----
+function render(){
+  $('today').textContent = NOW.toLocaleDateString(AR,{weekday:'long',day:'numeric',month:'long'});
+  if (W && !S.wallets.includes(W)) W = S.wallets.find(w=>w.id===W.id) || null; // بعد تحميل من السيرفر
+  if (view === 'wallet' && !W) { view = 'home'; show('home'); }
+  view === 'home' ? renderHome() : view === 'wallet' ? renderWallet() : null;
+}
+function renderHome(){
+  const box = $('wallets'); box.innerHTML = '';
+  if (!S.wallets.length) box.innerHTML = '<p class="note">ما عندك خطط. سوّ خطة لك أو لأحد ثاني، وحدد ميزانية كل يوم فيها.</p>';
+  S.wallets.forEach(w=>{
+    const b = document.createElement('button'); b.className = 'wcard';
+    const on = active(w, TODAY), left = eff(w, TODAY) - spent(w, TODAY);
+    b.innerHTML = `<span class="spread"><span class="nm"></span><span class="chip b num">الصندوق ${fmt(boxBalance(w))}</span></span>
+      <span class="note num">${on ? `باقي اليوم <b class="${left<0?'neg':''}">${fmt(left)}</b> من ${fmt(eff(w, TODAY))} ر.س` : 'ما فيه ميزانية لهالشهر'}</span>`;
+    b.querySelector('.nm').textContent = w.name;
+    b.onclick = () => { W = w; go('wallet'); };
+    box.append(b);
+  });
+}
+function renderWallet(){
+  const w = W;
+  $('wName').textContent = w.name;
+  if (document.activeElement !== $('renameIn')) $('renameIn').value = w.name;
+  const on = active(w, TODAY);
+  $('noPlan').hidden = on; $('active').hidden = !on;
+
+  if (on) {
+    const m = monthTotals(w, MONTH), daysLeft = daysIn(MONTH) - NOW.getDate() + 1;
+    $('mLabel').textContent = monthName(MONTH);
+    $('mText').textContent = `${fmt(m.sp)} من ${fmt(m.plan)} ر.س`;
+    $('mBar').style.width = Math.min(100, m.plan ? m.sp/m.plan*100 : 0)+'%';
+    $('mBarW').classList.toggle('over', m.sp > m.plan);
+    $('mHint').textContent = m.sp > m.plan ? `تعدّيت حد الشهر بـ ${fmt(m.sp-m.plan)} ر.س` : `باقي ${fmt(m.plan-m.sp)} ر.س لآخر الشهر (${daysLeft} يوم)`;
+
+    const e = eff(w, TODAY), s = spent(w, TODAY), left = e - s;
+    $('dayName').textContent = DOW[NOW.getDay()];
+    $('left').innerHTML = `${fmt(left)}<small>ر.س</small>`;
+    $('left').classList.toggle('neg', left < 0);
+    $('dBar').style.width = Math.min(100, e ? s/e*100 : 100)+'%';
+    $('dBarW').classList.toggle('over', s > e);
+    $('dSpent').textContent = `صرفت ${fmt(s)}`;
+    $('dBudget').textContent = `الميزانية ${fmt(budget(w, TODAY))}` + (pulled(w, TODAY) ? ` + ${fmt(pulled(w, TODAY))} من الصندوق` : '');
+    const xs = w.days[TODAY]?.x || [];
+    $('expList').innerHTML = '';
+    xs.slice().reverse().forEach((ex,i)=>{
+      const li = document.createElement('li');
+      li.innerHTML = `<span><span class="num">${fmt(ex.a)}</span> <span class="note"></span></span><button class="x" aria-label="احذف">×</button>`;
+      li.querySelector('.note').textContent = ex.n || '';
+      li.querySelector('button').onclick = () => { xs.splice(xs.length-1-i,1); change(); };
+      $('expList').append(li);
+    });
+  }
+
+  const ms = Object.keys(w.plans).sort();
+  $('plans').innerHTML = ms.length ? '' : '<li class="note">حدد ميزانية لشهر عشان يبدأ الحساب.</li>';
+  ms.forEach(m=>{
+    const p = w.plans[m], li = document.createElement('li');
+    li.innerHTML = `<span><span class="pm">${monthName(m)}</span>${p.rep?' <span class="chip">تتكرر للشهور اللي بعده</span>':''}</span><span class="num note">${fmt(monthTotals(w, m).plan)} ر.س</span>`;
+    li.onclick = () => openEditor({month:m});
+    $('plans').append(li);
+  });
+
+  const bal = boxBalance(w);
+  $('boxBal').innerHTML = `${fmt(bal)}<small>ر.س</small>`;
+  $('boxBal').classList.toggle('neg', bal < 0);
+  $('boxList').innerHTML = '';
+  w.box.slice().reverse().slice(0,30).forEach(b=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="note">${b.d}</span><span class="num ${b.k==='dep'?'':'neg'}">${b.k==='dep'?'+':'−'}${fmt(b.a)}</span>`;
+    $('boxList').append(li);
+  });
+
+  const past = Object.keys(w.days).filter(k=>k<TODAY && w.days[k].b != null).sort().reverse().slice(0,10);
+  $('pastCard').hidden = !past.length;
+  $('past').innerHTML = '';
+  past.forEach(k=>{
+    const l = eff(w, k) - spent(w, k), li = document.createElement('li');
+    li.innerHTML = `<span class="note">${DOW[dowOf(k)]} ${k.slice(5).replace('-','/')}</span><span class="num">${fmt(spent(w, k))} / ${fmt(eff(w, k))}</span><span class="chip ${l<0?'':'b'} num">${l<0?'عجز ':'للصندوق '}${fmt(Math.abs(l))}</span>`;
+    $('past').append(li);
+  });
+}
+
+// ---- المحرر ----
+let ed = {}; // {month: الشهر اللي نعدّله} أو {fresh:true} لخطة جديدة
+DOW.forEach((name,i)=>{
+  const d = document.createElement('label'); d.className = 'd'; d.htmlFor = 'w'+i; d.textContent = name;
+  const inp = document.createElement('input');
+  inp.type = 'number'; inp.inputMode = 'decimal'; inp.min = 0; inp.id = 'w'+i; inp.oninput = edTotals;
+  $('week').append(d, inp);
+});
+function edTotals(){
+  const w = DOW.map((_,i)=> +$('w'+i).value || 0), m = $('edMonth').value;
+  let mt = 0;
+  if (m) for (let i = 1; i <= daysIn(m); i++) mt += w[new Date(+m.slice(0,4), +m.slice(5,7)-1, i).getDay()];
+  $('weekTot').innerHTML = `<span>الأسبوع ${fmt(w.reduce((a,b)=>a+b,0))}</span><span>الشهر ${fmt(mt)} ر.س</span>`;
+}
+function openEditor(o){
+  ed = o;
+  const nextM = key(new Date(NOW.getFullYear(), NOW.getMonth()+1, 1)).slice(0,7);
+  const m = o.month || o.at || (o.fresh ? MONTH : nextM);
+  const p = o.fresh ? null : (W.plans[m] || planFor(W, m) || planFor(W, MONTH));
+  $('edTitle').textContent = o.fresh ? 'خطة جديدة' : o.month ? 'تعديل ميزانية الشهر' : 'ميزانية شهر';
+  $('edNameRow').hidden = !o.fresh; $('edName').value = '';
+  $('edMonth').value = m; $('edMonth').min = MONTH;
+  DOW.forEach((_,i)=> $('w'+i).value = p ? p.w[i] : '');
+  $('edRepeat').checked = o.month ? !!W.plans[m].rep : true;
+  $('edDel').hidden = !o.month; $('edWarn').textContent = '';
+  edTotals(); go('editor');
+}
+$('edMonth').oninput = edTotals;
+$('edCancel').onclick = () => go(ed.fresh ? 'home' : 'wallet');
+$('edSave').onclick = () => {
+  const warn = t => $('edWarn').textContent = t;
+  const m = $('edMonth').value, name = $('edName').value.trim();
+  if (ed.fresh && !name) return warn('اكتب اسم للخطة');
+  if (!m) return warn('اختر الشهر');
+  if (m < MONTH) return warn('اختر هالشهر أو اللي بعده');
+  if (!ed.fresh && m !== ed.month && W.plans[m]) return warn(`فيه ميزانية لـ${monthName(m)}، افتحها من القائمة وعدّلها`);
+  const wk = DOW.map((_,i)=> +$('w'+i).value || 0);
+  if (!wk.some(Boolean)) return warn('حط ميزانية ليوم واحد على الأقل');
+  if (ed.fresh) { W = {id: Date.now().toString(36), name, plans:{}, days:{}, box:[]}; S.wallets.push(W); }
+  if (ed.month && ed.month !== m) delete W.plans[ed.month];
+  const old = W.plans[m];
+  // الحساب يبدأ من أول الشهر، أو من اليوم لو الميزانية لهالشهر
+  W.plans[m] = {w: wk, rep: $('edRepeat').checked, from: old?.from || (m === MONTH ? TODAY : m+'-01')};
+  view = 'wallet'; show('wallet'); change();
+};
+let sure = null; // زر يحتاج ضغطتين
+function twice(btn, label, fn){
+  if (sure !== btn) { sure = btn; btn.textContent = 'متأكد؟ اضغط مرة ثانية'; return; }
+  sure = null; btn.textContent = label; fn();
+}
+$('edDel').onclick = () => twice($('edDel'), 'احذف ميزانية الشهر', () => { delete W.plans[ed.month]; view='wallet'; show('wallet'); change(); });
+
+// ---- أزرار الخطة ----
+$('addWallet').onclick = () => openEditor({fresh:true});
+$('toHome').onclick = () => { W = null; go('home'); };
+$('addMonth').onclick = () => openEditor({});
+$('addNow').onclick = () => openEditor({at: MONTH});
+$('renameBtn').onclick = () => { const n = $('renameIn').value.trim(); if (n) { W.name = n; change(); } };
+$('delWallet').onclick = () => twice($('delWallet'), 'احذف الخطة كاملة', () => {
+  S.wallets = S.wallets.filter(w => w !== W); W = null; view = 'home'; show('home'); change();
+});
+
+// ---- الصرف والصندوق ----
+$('expForm').onsubmit = ev => {
+  ev.preventDefault();
+  const a = +$('expAmt').value; if (!(a > 0)) return;
+  (W.days[TODAY] = W.days[TODAY] || {x:[]}).x.push({a, n:$('expNote').value.trim(), t:Date.now()});
+  $('expAmt').value = ''; $('expNote').value = ''; change();
+};
+function boxMove(k){
+  const a = +$('boxAmt').value; $('boxWarn').textContent = '';
+  if (!(a > 0)) { $('boxWarn').textContent = 'اكتب المبلغ أول'; return; }
+  if (k==='pull' && !active(W, TODAY)) { $('boxWarn').textContent = 'حدد ميزانية هالشهر أول'; return; }
+  if (k==='pull' && a > boxBalance(W)) { $('boxWarn').textContent = `الصندوق فيه ${fmt(boxBalance(W))} بس`; return; }
+  W.box.push({k, a, d:TODAY}); $('boxAmt').value = ''; change();
+}
+$('pull').onclick = () => boxMove('pull');
+$('dep').onclick = () => boxMove('dep');
+
+// ---- الحفظ ----
+function change(){ dirty = true; try { localStorage.setItem('masroofi', JSON.stringify(S)); } catch {} render(); clearTimeout(saveT); saveT = setTimeout(save, 300); }
+async function save(){
+  try { localStorage.setItem('masroofi', JSON.stringify(S)); } catch {}
+  if (!ref) { dirty = false; return; }
+  const sent = JSON.stringify(S);
+  try {
+    await ref.set(JSON.parse(sent));
+    if (JSON.stringify(S) === sent) dirty = false; // لو تغيّر شي أثناء الحفظ يتحفظ بالدورة الجاية
+    $('status').textContent = 'محفوظ';
+  } catch (e) { $('status').textContent = 'ما انحفظ: ' + (e?.code || 'تأكد من الاتصال'); }
+}
+function load(data){
+  if (data) {
+    if (!data.wallets) { // الصيغة القديمة: خطة وحدة
+      const old = {plans: data.plans||{}, days: data.days||{}, box: data.box||[]};
+      data = {wallets: Object.keys(old.plans).length || old.box.length ? [{id:'me', name:'مصروفي', ...old}] : []};
+    }
+    S = Object.assign(structuredClone(DEF), data);
+  }
+  S.wallets.forEach(closeDays); render();
+}
+
+try { load(JSON.parse(localStorage.getItem('masroofi'))); } catch { load(); }
+(async () => {
+  const [db, user] = await Promise.all([window.claude?.use('db'), window.claude?.use('user')]).catch(()=>[]);
+  const id = user && await user.id();
+  if (!db || !id) { $('status').textContent = 'محفوظ على هالجهاز بس'; return; }
+  ref = db.collection('data/users/'+id).doc('state');
+  const t = setTimeout(()=> $('status').textContent = 'الاتصال بطيء، تقدر تكمل وبيحفظ', 10000);
+  ref.onSnapshot(snap => {
+    clearTimeout(t);
+    if (snap.metadata.hasPendingWrites || dirty) return; // لا ترجّع نسخة السيرفر فوق تعديل ما انحفظ
+    if (snap.exists) load(snap.data()); else save();
+    $('status').textContent = 'محفوظ على حسابك';
+  }, () => { clearTimeout(t); $('status').textContent = 'ما قدرت أوصل للحفظ، البيانات على هالجهاز'; });
+})();
+</script>
+
+</body></html>
