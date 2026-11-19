@@ -726,7 +726,7 @@ const copy = (id, btn) => async () => {
 $('copyHook').onclick = copy('hookUrl', $('copyHook'));
 $('copyDev').onclick = copy('devUrl', $('copyDev'));
 // رابط iCloud لاختصار «مصروفي»؛ يسأل عن الرابط وقت الإضافة، فننسخه قبل ما نفتحه
-const SHORTCUT = 'https://www.icloud.com/shortcuts/d3835746639f474787ee924071878b8b';
+const SHORTCUT = 'https://www.icloud.com/shortcuts/92161ee164f0469b9be519fbe740d2ec';
 $('linkBtn').onclick = async () => {
   try { await navigator.clipboard.writeText($('hookUrl').value); } catch {}
   if (SHORTCUT) location.href = SHORTCUT; else $('linkBtn').textContent = 'انتسخ رابطك، الاختصار جاي قريب';
