@@ -642,7 +642,7 @@ function parseSms(raw){
   else if (/سحب|ATM|withdraw|صراف/i.test(t)) type = 'atm';
   else if (/صادرة|outward|outgoing|تحويل|transfer|سداد/i.test(t)) type = 'out';
   if (!type || !(a > 0)) return {type:null};
-  const nm = t.match(/(?:^|\n)\s*(?:لـ|لدى|From:|To:|الى:|إلى:)\s*([^\n]+)/i);
+  const nm = t.match(/(?:^|\n)\s*(?:لـ|لدى|From|To|الى|إلى)\s*:?\s*([^\n]+)/i);
   const n = nm ? nm[1].trim() : (type==='atm' ? 'سحب صراف' : '');
   let d = null, x;
   if ((x = t.match(/(20\d\d)-(\d\d)-(\d\d)/))) d = `${x[1]}-${x[2]}-${x[3]}`;
@@ -688,7 +688,7 @@ function renderSync(){
   S.wallets.forEach(w=> sel.add(new Option(w.name, w.id, false, w.id === (S.target || S.wallets[0]?.id))));
   if (document.activeElement !== $('ignore')) $('ignore').value = S.ignore ?? 'barq, stc';
   $('linked').hidden = !S.linked; $('linkSteps').hidden = !!S.linked;
-  $('hookUrl').value = `${FB.databaseURL}/u/${TOKEN}/inbox.json`;
+  $('hookUrl').value = `https://masroofi-hook.nawafalsawed.workers.dev/?k=${TOKEN}`;
   $('devUrl').value = location.origin + location.pathname + '?k=' + TOKEN;
 }
 $('target').onchange = () => { S.target = $('target').value; change(); };
