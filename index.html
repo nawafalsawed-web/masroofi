@@ -415,10 +415,12 @@ function parseSms(raw){
 // ---- رسائل البنك ----
 const hash = t => { let h = 0; for (const c of t) h = (h*31 + c.charCodeAt(0)) | 0; return h.toString(36); };
 function applySms(raw){
-  S.seen = S.seen || []; S.review = S.review || [];
-  const h = hash(raw);
-  if (S.seen.includes(h)) return; // نفس الرسالة وصلت مرتين
-  S.seen = [...S.seen, h].slice(-200);
+  S.review = S.review || [];
+  const h = hash(raw), now = Date.now();
+  // نفس الرسالة توصل مرتين من أتمتة SAR وSR بنفس اللحظة؛ نتجاهل التكرار خلال دقيقتين بس
+  const seen = Object.fromEntries(Object.entries(S.seen && !Array.isArray(S.seen) ? S.seen : {}).filter(([,t]) => now - t < 120000));
+  if (seen[h]) return;
+  seen[h] = now; S.seen = seen;
   const r = parseSms(raw);
   if (!r.type) return;
   const ign = (S.ignore ?? 'barq, stc').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
@@ -517,6 +519,10 @@ function startFirebase(){
       applySms(m.val()?.raw); change(); await save(); m.ref.remove();
     }); }
   }, e => $('status').textContent = 'ما قدرت أوصل للحفظ: ' + e.code);
+  // iOS يوقف الاتصال لما التطبيق يروح بالخلفية؛ نعيد الاتصال كل ما رجعت له
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { firebase.database().goOffline(); firebase.database().goOnline(); }
+  });
   return true;
 }
 
