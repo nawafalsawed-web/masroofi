@@ -1,219 +1,287 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>مصروفي اليومي</title>
-<link rel="icon" href="icon-180.png?v=2">
-<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="icon" href="icon-180.png?v=3">
+<link rel="apple-touch-icon" href="icon-180.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="مصروفي">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0F1714">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Readex+Pro:wght@500;700&display=swap">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F0FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13102A" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="fonts/thmanyah-Black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap">
 <style>
-/* layout: عمود واحد بعرض الجوال؛ بطاقة اليوم فوق، الخطة الأسبوعية تحتها، والصندوق بعدها */
+@font-face{font-family:"Thmanyah";src:url(fonts/thmanyah-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Thmanyah";src:url(fonts/thmanyah-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Thmanyah";src:url(fonts/thmanyah-Black.woff2) format("woff2");font-weight:900;font-display:swap}
+/* الفكرة: «الخزّان» البنفسجي هو مصروف اليوم، يمتلي بالباقي وينزل مع كل صرفة. كل شي غيره هادي.
+   الزعفراني للصندوق (لون العملة)، التوتي للتعدّي، البرتقالي لما يقرب يخلص. */
 :root{
-  --bg:#EEF2F0; --card:#FFFFFF; --ink:#13241E; --mute:#5E6F68; --line:#D5DED9;
-  --acc:#1F6F54; --acc-soft:#DCEDE5; --box:#B7791F; --box-soft:#F6EAD3; --bad:#C0392B;
-  --f-body:"IBM Plex Sans Arabic",system-ui,sans-serif; --f-num:"Readex Pro","IBM Plex Sans Arabic",sans-serif;
+  --paper:#F2F0FA; --surface:#FFFFFF; --ink:#1B1530; --mute:#6E6888; --line:#E3DFF2;
+  --ind:#4F35F0; --ind-deep:#2A1C8F; --ind-soft:#E7E2FF; --on-ind:#FFFFFF;
+  --saf:#F5B83D; --saf-deep:#C98A10; --saf-soft:#FFF1D1; --saf-ink:#4A3000;
+  --rasp:#E5264F; --rasp-deep:#8E0F2C; --tang:#FF8A3D;
+  --f-body:"Alexandria",system-ui,sans-serif; --f-disp:"Thmanyah","Alexandria",serif;
+  --r-l:32px; --r-m:22px; --r-s:14px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0F1714; --card:#17221E; --ink:#E6EEEA; --mute:#93A49C; --line:#2A3832;
-  --acc:#4FBF92; --acc-soft:#1D3A2F; --box:#E3A94B; --box-soft:#3A2E18; --bad:#EF6B5B; color-scheme:dark}}
+  --paper:#13102A; --surface:#1D1838; --ink:#F1EEFF; --mute:#9C95BC; --line:#2E2850;
+  --ind:#6A52FF; --ind-deep:#2A1F75; --ind-soft:#2A2257;
+  --saf:#F7C451; --saf-deep:#F7C451; --saf-soft:#33290F; --saf-ink:#2A1C00;
+  --rasp:#FF4D72; --rasp-deep:#5E0A20; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0F1714; --card:#17221E; --ink:#E6EEEA; --mute:#93A49C; --line:#2A3832;
-  --acc:#4FBF92; --acc-soft:#1D3A2F; --box:#E3A94B; --box-soft:#3A2E18; --bad:#EF6B5B; color-scheme:dark}
-body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--f-body);direction:rtl;padding-inline:16px;padding-block:max(20px,env(safe-area-inset-top)) 40px;margin:0}
-main{max-width:460px;margin:0 auto;display:grid;gap:14px}
-.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
-header{display:flex;justify-content:space-between;align-items:baseline}
-h1{font:700 20px var(--f-num);margin:0;display:flex;align-items:center;gap:10px}
-h1 img{width:34px;height:34px;border-radius:9px}
-.date{color:var(--mute);font-size:13px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:12px}
-.today{border-color:var(--acc-soft);box-shadow:0 1px 0 var(--acc-soft) inset}
-.today .big{font-size:56px}
-.label{font-size:12px;color:var(--mute);letter-spacing:.02em}
-.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
-.bar.over i{background:var(--bad)}
+  --paper:#13102A; --surface:#1D1838; --ink:#F1EEFF; --mute:#9C95BC; --line:#2E2850;
+  --ind:#6A52FF; --ind-deep:#2A1F75; --ind-soft:#2A2257;
+  --saf:#F7C451; --saf-deep:#F7C451; --saf-soft:#33290F; --saf-ink:#2A1C00;
+  --rasp:#FF4D72; --rasp-deep:#5E0A20; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.65 var(--f-body);direction:rtl;
+  padding:max(18px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+main{max-width:480px;margin:0 auto;display:grid;gap:28px}
+.stack{display:grid;gap:28px}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+h2,h3{margin:0;font-family:var(--f-disp);font-weight:700;text-wrap:balance}
+h2{font-size:22px}
+h3{font-size:17px}
+p{margin:0}
+.note{color:var(--mute);font-size:13px}
+.warn{color:var(--rasp);font-size:13px}
+.neg{color:var(--rasp)}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.spread{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.big{font:700 44px/1 var(--f-num)}
-.big small{font-size:16px;color:var(--mute);font-weight:500;margin-inline-start:4px}
-.neg{color:var(--bad)}
-input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
-input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-input.amt{width:110px;font-family:var(--f-num)}
+.spread{display:flex;justify-content:space-between;gap:10px;align-items:center}
+
+/* الأزرار والحقول */
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-s);padding:11px 14px;min-width:0;min-height:46px}
+input:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2.5px solid var(--ind);outline-offset:2px}
+input::placeholder{color:var(--mute)}
+input.amt{width:120px;font-weight:600}
 input.grow{flex:1}
-button{font:500 14px var(--f-body);border:0;border-radius:12px;padding:11px 16px;min-height:44px;cursor:pointer;background:var(--acc);color:var(--card)}
-button:active{transform:scale(.97)}
-button.x{min-height:0}
-.cta{width:100%;font-size:16px;font-weight:700;padding:14px}
+button{font:600 15px var(--f-body);border:0;border-radius:999px;padding:11px 20px;min-height:46px;cursor:pointer;background:var(--ind);color:var(--on-ind);transition:transform .12s}
+button:active{transform:scale(.96)}
+button.ghost{background:transparent;color:var(--ind);box-shadow:inset 0 0 0 1.5px var(--line)}
+button.boxbtn{background:var(--saf-ink);color:var(--saf)}
+button.x{background:none;color:var(--mute);min-height:0;padding:6px 10px;font-size:20px;line-height:1}
+button.sm{min-height:38px;padding:7px 16px;font-size:14px}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+
+/* الهيدر */
+header{display:flex;justify-content:space-between;align-items:center}
+h1{font:900 30px/1 var(--f-disp);margin:0;display:flex;align-items:center;gap:10px;letter-spacing:.01em}
+h1 img{width:38px;height:38px;border-radius:11px}
+.date{color:var(--mute);font-size:13px}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.back{background:none;color:var(--ind);padding:6px 0;min-height:0;display:flex;gap:4px;align-items:center}
+.title{font:900 40px/1.1 var(--f-disp);margin:0}
+
+/* الخزّان: مصروف اليوم. --left من ٠ إلى ١ */
+.tank{--left:1;--c:var(--ind);--deep:var(--ind-deep);position:relative;isolation:isolate;overflow:hidden;
+  border-radius:var(--r-l);padding:22px 22px 20px;color:#fff;background:var(--deep);display:grid;gap:6px}
+.tank::before{content:"";position:absolute;inset:auto 0 0 0;height:calc(var(--left)*100%);background:var(--c);z-index:-1;
+  border-radius:24px 24px 0 0;transition:height .9s cubic-bezier(.2,.8,.2,1)}
+.tank.low{--c:var(--tang)}
+.tank.over{--deep:var(--rasp-deep);--c:var(--rasp)}
+.tank .k{font-size:14px;opacity:.85;display:flex;justify-content:space-between;align-items:center}
+.tag{font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.18)}
+.big{font:900 92px/1 var(--f-disp);letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.big small{font:500 18px var(--f-body);opacity:.8}
+.tank .sub{display:flex;gap:14px;font-size:14px;opacity:.9}
+.quick{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.quick input{background:rgba(255,255,255,.14);border-color:transparent;color:#fff}
+.quick input::placeholder{color:rgba(255,255,255,.7)}
+.quick input.amt{width:110px}
+.quick button{background:#fff;color:var(--ind-deep)}
+.tank.over .quick button{color:var(--rasp-deep)}
+@media (prefers-reduced-motion:reduce){.tank::before{transition:none}button{transition:none}}
+
+/* صرفات اليوم: إيصال بسيط تحت الخزّان */
+.ledger{list-style:none;margin:-12px 0 0;padding:0 6px}
+.ledger li{border-top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.ledger li:last-child{border-bottom:0}
+.ledger .a{font:900 22px var(--f-disp);min-width:64px}
+.src{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--ind-soft);color:var(--ind);margin-inline-start:6px}
+
+/* الشهر: عمود لكل يوم */
+.month{display:grid;gap:14px}
+.chart{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;height:120px;align-items:end}
+.chart div{position:relative;height:100%;display:flex;align-items:flex-end;border-radius:6px}
+.chart i{position:relative;display:block;width:100%;background:var(--ind);border-radius:6px;min-height:3px}
+.chart i.over{background:var(--rasp)}
+.chart .f i{background:var(--line)}
+.chart .t i{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ind)}
+.chart b{position:absolute;inset-inline:0;bottom:0;background:var(--ind-soft);border-radius:6px}
+.axis{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;margin-top:-6px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:18px 16px;padding-top:6px}
+.st{display:grid;gap:0}
+.st b{font:900 34px/1.1 var(--f-disp);color:var(--ind)}
+.st.bad b{color:var(--rasp)}
+.st .label{font-size:13px;color:var(--ink);font-weight:500}
+.st small{font-size:12px;color:var(--mute)}
+.label{font-size:13px;color:var(--mute)}
+
+/* الصندوق: زعفراني بشكل مختلف عن الخزّان */
+.box{background:var(--saf);color:var(--saf-ink);border-radius:var(--r-m) var(--r-m) var(--r-m) 56px;padding:20px 22px;display:grid;gap:10px}
+.box .note{color:var(--saf-ink);opacity:.75}
+.box .big{font-size:64px;margin:0}
+.box input{background:rgba(255,255,255,.55);border-color:transparent;color:var(--saf-ink)}
+.box input::placeholder{color:rgba(74,48,0,.6)}
+.box button.ghost{color:var(--saf-ink);box-shadow:inset 0 0 0 1.5px rgba(74,48,0,.35)}
+.box .warn{color:var(--rasp-deep)}
+.box details summary{color:var(--saf-ink)}
+.box li{border-color:rgba(74,48,0,.18)}
+
+/* أماكن الصرف: شريط بطول النسبة */
+.places{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.places li{--p:0;border:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-s);
+  background:linear-gradient(to left,var(--ind-soft) calc(var(--p)*100%),var(--surface) 0)}
+.places .num{font-weight:600}
+
+/* أسطح عادية: لوحة واحدة للأشياء الثانوية */
+.panel{background:var(--surface);border-radius:var(--r-m);padding:20px;display:grid;gap:14px}
+ul{list-style:none;margin:0;padding:0;display:grid}
+li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+.calc li{display:block}
+details summary{cursor:pointer;font-weight:600;font-size:15px;padding:4px 0;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+";display:inline-block;width:20px;color:var(--ind);font-weight:700}
+details[open] summary::before{content:"−"}
+details > :not(summary){margin-top:10px}
+.chip{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--ind-soft);color:var(--ind);white-space:nowrap}
+.chip.b{background:var(--saf-soft);color:var(--saf-deep)}
+.chip.k{background:var(--line);color:var(--mute)}
+.pm{font-weight:600}
+.status{font-size:12px;color:var(--mute);text-align:center}
+
+/* الرئيسية: كل خطة خزّان صغير يمتلي من اليمين */
+.wl{display:grid;gap:12px}
+.wcard{--left:1;position:relative;isolation:isolate;overflow:hidden;text-align:start;width:100%;border-radius:var(--r-m);padding:18px 20px;
+  background:var(--ind-deep);color:#fff;display:grid;gap:2px}
+.wcard::before{content:"";position:absolute;inset:0 0 0 auto;width:calc(var(--left)*100%);background:var(--ind);z-index:-1}
+.wcard.over{background:var(--rasp-deep)}
+.wcard .nm{font:900 26px/1.2 var(--f-disp)}
+.wcard .note{color:rgba(255,255,255,.85)}
+.wcard .chip.b{position:absolute;inset-inline-end:16px;top:16px;background:var(--saf);color:var(--saf-ink)}
+.add{justify-self:start;display:flex;gap:6px;align-items:center}
 .steps{margin:0;padding-inline-start:20px;display:grid;gap:6px;font-size:14px}
 .steps li{display:list-item;border:0;padding:0}
-.steps b{color:var(--acc)}
-.ok{color:var(--acc);font-weight:700}
-button.ghost{background:transparent;color:var(--acc);border:1px solid var(--line)}
-button.boxbtn{background:var(--box);color:var(--card)}
-button.x{background:none;color:var(--mute);padding:4px 8px;font-size:18px;line-height:1}
-ul{list-style:none;margin:0;padding:0;display:grid}
-li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-li:first-child{border-top:0}
-.note{color:var(--mute);font-size:13px}
-.box{background:var(--box-soft);border-color:transparent}
-.box .big{color:var(--box)}
-.chip{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--acc-soft);color:var(--acc)}
-.chip.b{background:var(--box-soft);color:var(--box)}
-.warn{color:var(--bad);font-size:13px}
-.status{font-size:12px;color:var(--mute);text-align:center}
-.wk{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
-.wk .h{font-size:11px;color:var(--mute)}
-.wk .d{font-weight:500}.wk .d small{display:block;font-size:11px;color:var(--mute);font-weight:400}
-.wk input{width:84px;padding:6px 8px;font-family:var(--f-num)}
-.wk .on{color:var(--acc);font-weight:700}
-.wk .past{color:var(--mute)}
-.wkt{border-top:1px solid var(--line);padding-top:10px;font-weight:500}
-details summary{cursor:pointer;color:var(--mute);font-size:13px}
-.plans li{cursor:pointer}
-.plans li:hover .pm{color:var(--acc)}
-.pm{font-weight:700}
-.check{display:flex;gap:8px;align-items:center}
-.check input{width:18px;height:18px;accent-color:var(--acc)}
-select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-.chip.k{background:var(--line);color:var(--mute)}
+.steps b{color:var(--ind)}
+.cta{width:100%;font-size:16px;padding:14px}
+.ok{color:var(--ind);font-weight:700}
 .empty{text-align:center;justify-items:center}
-[hidden]{display:none!important}
-.wl{display:grid;gap:10px}
-.wcard{text-align:start;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:6px;width:100%}
-.wcard:hover{border-color:var(--acc)}
-.wcard .nm{font:700 17px var(--f-num)}
-.back{background:none;color:var(--acc);padding:4px 0;font-weight:500}
-h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.st{background:var(--bg);border-radius:12px;padding:10px 12px;display:grid;gap:2px}
-.st b{font:700 22px var(--f-num)}
-.st small{font-size:11px;color:var(--mute)}
-.st.bad b{color:var(--bad)}
-.chart{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;height:110px}
-.chart div{position:relative;display:flex;align-items:flex-end}
-.chart i{display:block;width:100%;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px}
-.chart i.over{background:var(--bad)}
-.chart b{position:absolute;inset-inline:-2px;border-top:2px dashed var(--mute)}
-.calc li{display:block}
+.check{display:flex;gap:10px;align-items:center}
+.check input{width:20px;height:20px;min-height:0;accent-color:var(--ind)}
+
+/* محرر الخطة: سبعة أيام */
+.wk{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wk label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.wk input{width:100%;font-weight:600;font-size:17px}
+.wkt{font-weight:600;padding-top:4px}
 </style>
 
 <main>
-  <header><h1><img src="icon-180.png?v=2" alt="">مصروفي</h1><span class="date" id="today"></span></header>
+  <header><h1><img src="icon-180.png?v=3" alt="">مصروفي</h1><span class="date" id="today"></span></header>
 
   <!-- الرئيسية: كل الخطط -->
-  <div id="homeV" style="display:contents">
-    <section class="card">
-      <div class="spread"><span class="label">خططي</span><button class="ghost" id="addWallet">+ خطة جديدة</button></div>
+  <div id="homeV" class="stack">
+    <section class="stack" style="gap:14px">
       <div class="wl" id="wallets"></div>
+      <button class="ghost add" id="addWallet"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>خطة جديدة</button>
     </section>
 
-    <section class="card" id="reviewCard" hidden>
-      <span class="label">تحويلات تحتاج قرارك</span>
-      <span class="note">التحويلات ما تنحسب صرف إلا لو قلت.</span>
+    <section class="panel" id="reviewCard" hidden>
+      <h3>تحويلات تحتاج قرارك</h3>
+      <p class="note">التحويلات ما تنحسب صرف إلا لو قلت.</p>
       <ul id="review"></ul>
     </section>
 
-    <section class="card" id="syncCard" hidden>
-      <div class="spread"><span class="label">ربط رسائل البنك</span><span class="ok" id="linked" hidden>مربوط ✓</span></div>
+    <section class="panel" id="syncCard" hidden>
+      <div class="head"><h3>رسائل البنك</h3><span class="ok" id="linked" hidden>مربوط ✓</span></div>
       <div id="linkSteps" style="display:grid;gap:12px">
-        <span class="note">كل ما وصلتك رسالة شراء من البنك تنحسب هنا لحالها.</span>
+        <p class="note">كل ما وصلتك رسالة شراء من البنك تنحسب هنا لحالها.</p>
         <button class="cta" id="linkBtn">اربط البنك بضغطة</button>
         <ol class="steps">
           <li>اضغط الزر، رابطك ينسخ ويفتح لك اختصار «مصروفي».</li>
           <li>الصق الرابط واضغط <b>إضافة الاختصار</b>.</li>
           <li>من الاختصارات: <b>أتمتة</b> ← <b>+</b> ← <b>الرسائل</b> ← تحتوي <b>SAR</b> ← <b>تشغيل فوري</b> ← اختر <b>مصروفي</b>.</li>
         </ol>
-        <span class="note">أول ما توصل رسالة بنك بتشوف «مربوط ✓» هنا.</span>
+        <p class="note">أول ما توصل رسالة بنك بتشوف «مربوط ✓» هنا.</p>
       </div>
       <div class="spread"><label for="target">الصرف يروح لخطة</label><select id="target"></select></div>
       <div class="spread"><label for="ignore">تجاهل اللي يروح لـ</label><input id="ignore" class="grow" placeholder="barq, stc"></div>
-      <span class="note">الشحن لمحافظك نفسها (برق، اس تي سي) ما ينحسب عشان ما يتكرر الصرف.</span>
+      <p class="note">الشحن لمحافظك نفسها (برق، اس تي سي) ما ينحسب عشان ما يتكرر الصرف.</p>
       <details><summary>الرابط يدوي والأجهزة الثانية</summary>
-        <div class="note">رابط الاختصار (Get Contents of URL، POST، JSON فيه raw = الرسالة):</div>
-        <div class="row"><input id="hookUrl" class="grow num" readonly><button class="ghost" id="copyHook">انسخ</button></div>
-        <div class="note">افتح هالرابط بجهاز ثاني عشان تشوف نفس البيانات:</div>
-        <div class="row"><input id="devUrl" class="grow num" readonly><button class="ghost" id="copyDev">انسخ</button></div>
-        <div class="warn">لا ترسل الرابطين لأحد، اللي معه الرابط يشوف بياناتك.</div>
+        <p class="note">رابط الاختصار (Get Contents of URL، POST، JSON فيه raw = الرسالة):</p>
+        <div class="row"><input id="hookUrl" class="grow num" readonly><button class="ghost sm" id="copyHook">انسخ</button></div>
+        <p class="note">افتح هالرابط بجهاز ثاني عشان تشوف نفس البيانات:</p>
+        <div class="row"><input id="devUrl" class="grow num" readonly><button class="ghost sm" id="copyDev">انسخ</button></div>
+        <p class="warn">لا ترسل الرابطين لأحد، اللي معه الرابط يشوف بياناتك.</p>
       </details>
     </section>
   </div>
 
   <!-- صفحة خطة -->
-  <div id="walletV" style="display:contents" hidden>
-    <div class="spread"><button class="back" id="toHome">→ كل الخطط</button><button class="ghost" id="editW">عدّل الخطة</button></div>
-    <h2 id="wName"></h2>
+  <div id="walletV" class="stack" hidden>
+    <div style="display:grid;gap:4px">
+      <div class="nav"><button class="back" id="toHome"><svg class="ico" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>خططي</button><button class="ghost sm" id="editW">عدّل الخطة</button></div>
+      <h2 class="title" id="wName"></h2>
+    </div>
 
-    <section class="card empty" id="noPlan" hidden>
-      <span class="label">الخطة خلصت مع نهاية شهرها</span>
-      <span class="note">جدّدها عشان يبدأ حساب هالشهر.</span>
+    <section class="panel empty" id="noPlan" hidden>
+      <h3>الخطة خلصت مع نهاية شهرها</h3>
+      <p class="note">جدّدها عشان يبدأ حساب هالشهر.</p>
       <button id="renew">جدّد الخطة</button>
     </section>
 
-    <div id="active" style="display:contents" hidden>
-      <section class="card">
-        <div class="spread"><span class="label" id="mLabel"></span><span class="note num" id="mText"></span></div>
-        <div class="bar" id="mBarW"><i id="mBar"></i></div>
-        <div class="note" id="mHint"></div>
-      </section>
-
-      <section class="card today">
-        <div class="spread"><span class="label">باقي اليوم</span><span class="chip" id="dayName"></span></div>
+    <div id="active" class="stack" hidden>
+      <section class="tank" id="hero">
+        <div class="k"><span>باقي اليوم</span><span class="tag" id="dayName"></span></div>
         <div class="big num" id="left"></div>
-        <div class="bar" id="dBarW"><i id="dBar"></i></div>
-        <div class="spread note num"><span id="dSpent"></span><span id="dBudget"></span></div>
-        <form class="row" id="expForm">
+        <div class="sub num"><span id="dSpent"></span><span id="dBudget"></span></div>
+        <form class="quick" id="expForm">
           <input id="expAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ" required>
           <input id="expNote" class="grow" placeholder="على إيش؟">
           <button>صرفت</button>
         </form>
-        <ul id="expList"></ul>
+      </section>
+      <ul class="ledger" id="expList"></ul>
+
+      <section class="month">
+        <div class="head"><h3 id="mLabel"></h3><span class="num note" id="mText"></span></div>
+        <div id="chartCard" style="display:grid;gap:10px">
+          <div class="chart" id="chart" role="img"></div>
+          <div class="axis"><span>أول الشهر</span><span>الفاتح = ميزانية اليوم</span><span>آخره</span></div>
+        </div>
+        <p class="note" id="mHint"></p>
+        <div id="insCard" style="display:grid;gap:12px">
+          <div class="facts" id="stats"></div>
+          <p class="note" id="insNote"></p>
+        </div>
       </section>
     </div>
 
-    <section class="card" id="insCard" hidden>
-      <span class="label">قراءة الشهر</span>
-      <div class="stats" id="stats"></div>
-      <div class="note" id="insNote"></div>
-    </section>
-
-    <section class="card" id="chartCard" hidden>
-      <div class="spread"><span class="label">آخر ١٤ يوم</span><span class="note">المتقطّع = ميزانية اليوم</span></div>
-      <div class="chart" id="chart" role="img"></div>
-      <div class="spread note"><span>قبل أسبوعين</span><span>اليوم</span></div>
-    </section>
-
-    <section class="card box">
-      <div class="spread"><span class="label">صندوق هالخطة</span><span class="chip b">يتجمّع من باقي كل يوم</span></div>
+    <section class="box">
+      <div class="head"><h3>الصندوق</h3><span class="note">يتجمّع من باقي كل يوم</span></div>
       <div class="big num" id="boxBal"></div>
       <div class="row">
         <input id="boxAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ">
         <button class="boxbtn" id="pull">اسحب لليوم</button>
-        <button class="ghost" id="dep">أضف للصندوق</button>
+        <button class="ghost" id="dep">أضف له</button>
       </div>
-      <div class="note">اللي تضيفه للصندوق ينحسب على مجموع الشهر.</div>
-      <div class="warn" id="boxWarn"></div>
+      <p class="note">اللي تضيفه للصندوق ينحسب على مجموع الشهر.</p>
+      <p class="warn" id="boxWarn"></p>
       <details><summary>حركة الصندوق</summary><ul id="boxList"></ul></details>
     </section>
 
-    <section class="card" id="monthsCard" hidden>
-      <span class="label">الشهور الماضية</span>
-      <ul id="months"></ul>
+    <section class="month" id="topCard" hidden>
+      <h3>وين يروح صرفك هالشهر</h3>
+      <ul class="places" id="top"></ul>
     </section>
 
-    <section class="card" id="pastCard" hidden>
-      <span class="label">آخر الأيام</span>
-      <ul id="past"></ul>
-    </section>
-    <section class="card" id="topCard" hidden>
-      <span class="label">وين يروح صرفك هالشهر</span>
-      <ul id="top"></ul>
-    </section>
-
-    <section class="card calc">
-      <span class="label">حاسبات</span>
+    <section class="panel calc">
+      <h3>حاسبات</h3>
       <details open><summary>أقدر أشتريها؟</summary>
         <div class="row"><input id="buyAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="السعر"></div>
         <ul id="buyOut"></ul>
@@ -224,19 +292,24 @@ h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
       </details>
     </section>
 
-    <button class="ghost" id="exportBtn">نزّل كل المصروفات (Excel / CSV)</button>
+    <section class="panel">
+      <h3>السجل</h3>
+      <details id="monthsCard" hidden><summary>الشهور الماضية</summary><ul id="months"></ul></details>
+      <details id="pastCard" hidden><summary>آخر الأيام</summary><ul id="past"></ul></details>
+      <button class="ghost sm" id="exportBtn" style="justify-self:start">نزّل كل المصروفات (Excel)</button>
+    </section>
   </div>
 
   <!-- محرر الخطة -->
-  <section class="card" id="editor" hidden>
-    <div class="spread"><span class="label" id="edTitle"></span><button class="ghost" id="edCancel">رجوع</button></div>
-    <div class="spread"><label for="edName">اسم الخطة</label><input id="edName" class="grow" placeholder="مثلاً: مصروفي، أخوي فهد"></div>
-    <span class="label">ميزانية كل يوم</span>
+  <section class="panel" id="editor" hidden>
+    <div class="head"><h2 id="edTitle"></h2><button class="ghost sm" id="edCancel">رجوع</button></div>
+    <label style="display:grid;gap:6px" for="edName">اسم الخطة<input id="edName" placeholder="مثلاً: مصروفي، أخوي فهد"></label>
+    <h3>ميزانية كل يوم</h3>
     <div class="wk" id="week"></div>
     <div class="spread num wkt" id="weekTot"></div>
     <label class="check"><input type="checkbox" id="edRep"> عامة: تتجدد كل شهر وتنحفظ الشهور اللي فاتت</label>
-    <div class="note" id="edRepNote"></div>
-    <div class="warn" id="edWarn"></div>
+    <p class="note" id="edRepNote"></p>
+    <p class="warn" id="edWarn"></p>
     <div class="row"><button id="edSave">احفظ</button><button class="ghost" id="edDel" hidden>احذف الخطة</button></div>
   </section>
 
@@ -313,8 +386,10 @@ function renderHome(){
   S.wallets.forEach(w=>{
     const b = document.createElement('button'); b.className = 'wcard';
     const on = active(w, TODAY), left = eff(w, TODAY) - spent(w, TODAY);
-    b.innerHTML = `<span class="spread"><span class="nm"></span><span class="chip b num">الصندوق ${fmt(boxBalance(w))}</span></span>
-      <span class="note num">${on ? `باقي اليوم <b class="${left<0?'neg':''}">${fmt(left)}</b> من ${fmt(eff(w, TODAY))} ر.س` : 'الخطة خلصت مع نهاية شهرها'}</span>`;
+    b.innerHTML = `<span class="nm"></span><span class="chip b num">الصندوق ${fmt(boxBalance(w))}</span>
+      <span class="note num">${on ? `باقي اليوم ${fmt(left)} من ${fmt(eff(w, TODAY))} ر.س` : 'الخطة خلصت مع نهاية شهرها'}</span>`;
+    b.style.setProperty('--left', on && eff(w, TODAY) > 0 ? Math.max(0, Math.min(1, left/eff(w, TODAY))) : 0);
+    b.classList.toggle('over', on && left < 0);
     b.querySelector('.nm').textContent = w.name;
     b.onclick = () => { W = w; go('wallet'); };
     box.append(b);
@@ -330,26 +405,24 @@ function renderWallet(){
     const m = monthTotals(w, MONTH), daysLeft = daysIn(MONTH) - NOW.getDate() + 1;
     $('mLabel').textContent = monthName(MONTH) + (w.rep ? '' : ' (هالشهر بس)');
     $('mText').textContent = `${fmt(m.sp)} من ${fmt(m.total)} ر.س`;
-    $('mBar').style.width = Math.min(100, m.total ? m.sp/m.total*100 : 0)+'%';
-    $('mBarW').classList.toggle('over', m.sp > m.total);
     $('mHint').textContent = (m.sp > m.total ? `تعدّيت مجموع الشهر بـ ${fmt(m.sp-m.total)} ر.س` : `باقي ${fmt(m.total-m.sp)} ر.س لآخر الشهر (${daysLeft} يوم)`)
       + (m.dep ? `. منها ${fmt(m.dep)} أضفتها للصندوق` : '');
 
     const e = eff(w, TODAY), s = spent(w, TODAY), left = e - s;
     $('dayName').textContent = DOW[NOW.getDay()];
     $('left').innerHTML = `${fmt(left)}<small>ر.س</small>`;
-    $('left').classList.toggle('neg', left < 0);
-    $('dBar').style.width = Math.min(100, e ? s/e*100 : 100)+'%';
-    $('dBarW').classList.toggle('over', s > e);
+    const r = e > 0 ? Math.max(0, Math.min(1, left/e)) : 0;
+    $('hero').style.setProperty('--left', r);
+    $('hero').classList.toggle('over', left < 0);
+    $('hero').classList.toggle('low', left >= 0 && r < .25);
     $('dSpent').textContent = `صرفت ${fmt(s)}`;
     $('dBudget').textContent = `الميزانية ${fmt(budget(w, TODAY))}` + (pulled(w, TODAY) ? ` + ${fmt(pulled(w, TODAY))} من الصندوق` : '');
     const xs = w.days[TODAY]?.x || [];
     $('expList').innerHTML = '';
     xs.slice().reverse().forEach((ex,i)=>{
       const li = document.createElement('li');
-      li.innerHTML = `<span><span class="num">${fmt(ex.a)}</span> <span class="note"></span></span><button class="x" aria-label="احذف">×</button>`;
-      li.querySelector('.note').textContent = (ex.n || '') ;
-      if (ex.src) li.querySelector('.note').insertAdjacentHTML('afterend', ' <span class="chip k">من البنك</span>');
+      li.innerHTML = `<span class="row" style="gap:10px"><span class="a num">${fmt(ex.a)}</span><span><span class="n"></span>${ex.src ? '<span class="src">من البنك</span>' : ''}</span></span><button class="x" aria-label="احذف">×</button>`;
+      li.querySelector('.n').textContent = ex.n || 'بدون وصف';
       li.querySelector('button').onclick = () => { xs.splice(xs.length-1-i,1); change(); };
       $('expList').append(li);
     });
@@ -419,13 +492,13 @@ function renderInsights(w, on){
     }
     $('insNote').textContent = t;
   }
-  // آخر ١٤ يوم: العمود صرفك والمتقطّع ميزانية اليوم
+  // الشهر كامل: عمود لكل يوم، الخط ميزانية اليوم، والأيام الجاية باهتة
   const vals = [];
-  for (let i = 13; i >= 0; i--) { const k = key(addDays(NOW, -i)); vals.push({k, s: spent(w,k), b: active(w,k) ? eff(w,k) : 0}); }
+  for (let i = 1; i <= daysIn(MONTH); i++) { const k = MONTH+'-'+pad(i); vals.push({k, s: spent(w,k), b: active(w,k) ? eff(w,k) : 0}); }
   const mx = Math.max(1, ...vals.map(v => Math.max(v.s, v.b)));
   $('chartCard').hidden = !vals.some(v => v.s || v.b);
-  $('chart').setAttribute('aria-label', 'صرف آخر ١٤ يوم: ' + vals.map(v => fmt(v.s)).join('، '));
-  $('chart').innerHTML = vals.map(v => `<div title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}"><i class="${v.s > v.b ? 'over' : ''}" style="height:${v.s/mx*100}%"></i>${v.b ? `<b style="bottom:${v.b/mx*100}%"></b>` : ''}</div>`).join('');
+  $('chart').setAttribute('aria-label', 'صرف كل يوم هالشهر: ' + vals.filter(v => v.k <= TODAY).map(v => fmt(v.s)).join('، '));
+  $('chart').innerHTML = vals.map(v => `<div class="${v.k > TODAY ? 'f' : v.k === TODAY ? 't' : ''}" title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}">${v.b ? `<b style="height:${v.b/mx*100}%"></b>` : ''}<i class="${v.s > v.b ? 'over' : ''}" style="height:${v.k > TODAY ? 0 : v.s/mx*100}%"></i></div>`).join('');
   // وين يروح الصرف: يجمع حسب الوصف
   const g = {};
   for (let i = 1; i <= daysIn(MONTH); i++) for (const e of (w.days[MONTH+'-'+pad(i)]?.x || [])) {
@@ -436,6 +509,7 @@ function renderInsights(w, on){
   $('top').innerHTML = '';
   top.forEach(([n,v]) => {
     const li = document.createElement('li');
+    li.style.setProperty('--p', v.a/top[0][1].a);
     li.innerHTML = `<span><span></span> <span class="note num">${v.c} مرة</span></span><span class="num">${fmt(v.a)} <small class="note">${Math.round(v.a/tot*100)}%</small></span>`;
     li.querySelector('span span').textContent = n;
     $('top').append(li);
@@ -477,10 +551,10 @@ $('exportBtn').onclick = () => {
 // ---- المحرر ----
 let ed = {}; // {fresh:true} لخطة جديدة
 DOW.forEach((name,i)=>{
-  const d = document.createElement('label'); d.className = 'd'; d.htmlFor = 'w'+i; d.textContent = name;
+  const d = document.createElement('label'); d.textContent = name;
   const inp = document.createElement('input');
-  inp.type = 'number'; inp.inputMode = 'decimal'; inp.min = 0; inp.id = 'w'+i; inp.oninput = edTotals;
-  $('week').append(d, inp);
+  inp.type = 'number'; inp.inputMode = 'decimal'; inp.min = 0; inp.id = 'w'+i; inp.placeholder = '0'; inp.oninput = edTotals;
+  d.append(inp); $('week').append(d);
 });
 function edTotals(){
   const w = DOW.map((_,i)=> +$('w'+i).value || 0);
