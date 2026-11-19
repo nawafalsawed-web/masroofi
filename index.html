@@ -494,13 +494,15 @@ function load(data){
 function startFirebase(){
   const u = new URL(location.href), k = u.searchParams.get('k');
   try {
-    if (k && k.length >= 30) { localStorage.setItem('masroofi_k', k); u.searchParams.delete('k'); history.replaceState(null, '', u); }
+    if (k && k.length >= 30) localStorage.setItem('masroofi_k', k);
     TOKEN = localStorage.getItem('masroofi_k');
     if (!TOKEN) {
       const b = crypto.getRandomValues(new Uint8Array(24));
       TOKEN = btoa(String.fromCharCode(...b)).replace(/[+/=]/g, c => ({'+':'-','/':'_','=':''}[c]));
       localStorage.setItem('masroofi_k', TOKEN);
     }
+    // التوكن يبقى في الرابط عشان «إضافة للشاشة الرئيسية» تفتح نفس البيانات (الأيقونة لها تخزين منفصل عن Safari)
+    if (u.searchParams.get('k') !== TOKEN) { u.searchParams.set('k', TOKEN); history.replaceState(null, '', u); }
   } catch { return false; }
   firebase.initializeApp(FB);
   fb = firebase.database().ref('u/' + TOKEN);
