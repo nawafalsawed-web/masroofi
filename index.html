@@ -61,6 +61,8 @@ details summary{cursor:pointer;color:var(--mute);font-size:13px}
 .pm{font-weight:700}
 .check{display:flex;gap:8px;align-items:center}
 .check input{width:18px;height:18px;accent-color:var(--acc)}
+select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.chip.k{background:var(--line);color:var(--mute)}
 .empty{text-align:center;justify-items:center}
 [hidden]{display:none!important}
 .wl{display:grid;gap:10px}
@@ -79,6 +81,26 @@ h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
     <section class="card">
       <div class="spread"><span class="label">خططي</span><button class="ghost" id="addWallet">+ خطة جديدة</button></div>
       <div class="wl" id="wallets"></div>
+    </section>
+
+    <section class="card" id="reviewCard" hidden>
+      <span class="label">تحويلات تحتاج قرارك</span>
+      <span class="note">التحويلات ما تنحسب صرف إلا لو قلت.</span>
+      <ul id="review"></ul>
+    </section>
+
+    <section class="card" id="syncCard" hidden>
+      <span class="label">ربط رسائل البنك</span>
+      <div class="spread"><label for="target">الصرف يروح لخطة</label><select id="target"></select></div>
+      <div class="spread"><label for="ignore">تجاهل اللي يروح لـ</label><input id="ignore" class="grow" placeholder="barq, stc"></div>
+      <span class="note">الشحن لمحافظك نفسها (برق، اس تي سي) ما ينحسب عشان ما يتكرر الصرف.</span>
+      <details><summary>رابط الاختصار والأجهزة الثانية</summary>
+        <div class="note">رابط الاختصار (Get Contents of URL، POST، JSON فيه raw = الرسالة):</div>
+        <div class="row"><input id="hookUrl" class="grow num" readonly><button class="ghost" id="copyHook">انسخ</button></div>
+        <div class="note">افتح هالرابط بجهاز ثاني عشان تشوف نفس البيانات:</div>
+        <div class="row"><input id="devUrl" class="grow num" readonly><button class="ghost" id="copyDev">انسخ</button></div>
+        <div class="warn">لا ترسل الرابطين لأحد، اللي معه الرابط يشوف بياناتك.</div>
+      </details>
     </section>
   </div>
 
@@ -154,6 +176,8 @@ h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
   <div class="status" id="status">جاري التحميل…</div>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US');
@@ -216,6 +240,7 @@ function render(){
   if (view === 'home') renderHome(); else if (view === 'wallet') renderWallet();
 }
 function renderHome(){
+  renderSync();
   const box = $('wallets'); box.innerHTML = '';
   if (!S.wallets.length) box.innerHTML = '<p class="note">ما عندك خطط. سوّ خطة لك أو لأحد ثاني، وحدد ميزانية كل يوم فيها.</p>';
   S.wallets.forEach(w=>{
@@ -256,7 +281,8 @@ function renderWallet(){
     xs.slice().reverse().forEach((ex,i)=>{
       const li = document.createElement('li');
       li.innerHTML = `<span><span class="num">${fmt(ex.a)}</span> <span class="note"></span></span><button class="x" aria-label="احذف">×</button>`;
-      li.querySelector('.note').textContent = ex.n || '';
+      li.querySelector('.note').textContent = (ex.n || '') ;
+      if (ex.src) li.querySelector('.note').insertAdjacentHTML('afterend', ' <span class="chip k">من البنك</span>');
       li.querySelector('button').onclick = () => { xs.splice(xs.length-1-i,1); change(); };
       $('expList').append(li);
     });
@@ -365,13 +391,85 @@ function boxMove(k){
 $('pull').onclick = () => boxMove('pull');
 $('dep').onclick = () => boxMove('dep');
 
+// يقرا رسالة البنك ويرجّع {type:'buy'|'atm'|'out'|null, a, n, d}
+// buy/atm تنحسب على طول، out (تحويل صادر) تروح للمراجعة، null تتجاهل
+function parseSms(raw){
+  const t = String(raw||'').replace(/\r/g,'');
+  if (/OTP|رمز|كود|code|واردة|incoming|استرداد|refund|إيداع|deposit|رفض|declined|مرفوض/i.test(t)) return {type:null};
+  const m = t.match(/(?:SAR|SR|ر\.س)\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:SAR|SR|ر\.س)/i);
+  if (!m) return {type:null};
+  const a = +(m[1]||m[2]).replace(/,/g,'');
+  let type = null;
+  if (/شراء|purchase|POS|نقاط بيع|مدفوعات|payment/i.test(t)) type = 'buy';
+  else if (/سحب|ATM|withdraw|صراف/i.test(t)) type = 'atm';
+  else if (/صادرة|outward|outgoing|تحويل|transfer|سداد/i.test(t)) type = 'out';
+  if (!type || !(a > 0)) return {type:null};
+  const nm = t.match(/(?:^|\n)\s*(?:لـ|لدى|From:|To:|الى:|إلى:)\s*([^\n]+)/i);
+  const n = nm ? nm[1].trim() : (type==='atm' ? 'سحب صراف' : '');
+  let d = null, x;
+  if ((x = t.match(/(20\d\d)-(\d\d)-(\d\d)/))) d = `${x[1]}-${x[2]}-${x[3]}`;
+  else if ((x = t.match(/(\d\d)\/(\d\d)\/(\d\d)\b/))) d = `20${x[3]}-${x[2]}-${x[1]}`;
+  return {type, a, n, d};
+}
+
+// ---- رسائل البنك ----
+const hash = t => { let h = 0; for (const c of t) h = (h*31 + c.charCodeAt(0)) | 0; return h.toString(36); };
+function applySms(raw){
+  S.seen = S.seen || []; S.review = S.review || [];
+  const h = hash(raw);
+  if (S.seen.includes(h)) return; // نفس الرسالة وصلت مرتين
+  S.seen = [...S.seen, h].slice(-200);
+  const r = parseSms(raw);
+  if (!r.type) return;
+  const ign = (S.ignore ?? 'barq, stc').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+  if (ign.some(x => r.n.toLowerCase().includes(x))) return;
+  const ex = {a:r.a, n:r.n, d:r.d || TODAY};
+  const w = S.wallets.find(w=>w.id===S.target) || S.wallets[0];
+  if (r.type === 'out' || !w) { S.review.push({...ex, id:h}); return; }
+  addExp(w, ex);
+}
+function addExp(w, ex){ (w.days[ex.d] = w.days[ex.d] || {x:[]}).x.push({a:ex.a, n:ex.n, t:Date.now(), src:1}); }
+function renderSync(){
+  $('syncCard').hidden = !fb;
+  const rv = S.review || [];
+  $('reviewCard').hidden = !rv.length;
+  $('review').innerHTML = '';
+  rv.forEach((it,i)=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span><span class="num">${fmt(it.a)}</span> <span class="note"></span> <span class="note num">${it.d.slice(5).replace('-','/')}</span></span><span class="row"><button class="ghost">احسبها</button><button class="x" aria-label="تجاهل">×</button></span>`;
+    li.querySelector('.note').textContent = it.n;
+    const [yes, no] = li.querySelectorAll('button');
+    yes.onclick = () => { const w = S.wallets.find(w=>w.id===S.target) || S.wallets[0]; if (!w) return; addExp(w, it); rv.splice(i,1); change(); };
+    no.onclick = () => { rv.splice(i,1); change(); };
+    $('review').append(li);
+  });
+  if (!fb) return;
+  const sel = $('target'); sel.innerHTML = '';
+  S.wallets.forEach(w=> sel.add(new Option(w.name, w.id, false, w.id === (S.target || S.wallets[0]?.id))));
+  if (document.activeElement !== $('ignore')) $('ignore').value = S.ignore ?? 'barq, stc';
+  $('hookUrl').value = `${FB.databaseURL}/u/${TOKEN}/inbox.json`;
+  $('devUrl').value = location.origin + location.pathname + '?k=' + TOKEN;
+}
+$('target').onchange = () => { S.target = $('target').value; change(); };
+$('ignore').onchange = () => { S.ignore = $('ignore').value; change(); };
+const copy = (id, btn) => async () => {
+  try { await navigator.clipboard.writeText($(id).value); btn.textContent = 'انتسخ'; }
+  catch { $(id).select(); btn.textContent = 'انسخه يدوي'; }
+};
+$('copyHook').onclick = copy('hookUrl', $('copyHook'));
+$('copyDev').onclick = copy('devUrl', $('copyDev'));
+
 // ---- الحفظ ----
+// Claude (لو مفتوح كـArtifact) ← Firebase (نسخة GitHub) ← المتصفح بس
+const FB = {apiKey:"AIzaSyDhkDII_22KBH99luPG1O5dxoGowJ01jW8", authDomain:"masroofi-nawaf.firebaseapp.com",
+  databaseURL:"https://masroofi-nawaf-default-rtdb.firebaseio.com", projectId:"masroofi-nawaf", appId:"1:264723616497:web:246265ca75e6afa7cbcf50"};
+let fb = null, TOKEN = null;
 function change(){ dirty = true; try { localStorage.setItem('masroofi', JSON.stringify(S)); } catch {} render(); clearTimeout(saveT); saveT = setTimeout(save, 300); }
 async function save(){
-  if (!ref) { dirty = false; return; }
+  if (!ref && !fb) { dirty = false; return; }
   const sent = JSON.stringify(S);
   try {
-    await ref.set(JSON.parse(sent));
+    if (ref) await ref.set(JSON.parse(sent)); else await fb.child('state').set(sent);
     if (JSON.stringify(S) === sent) dirty = false; // لو تغيّر شي أثناء الحفظ يتحفظ بالدورة الجاية
     $('status').textContent = 'محفوظ';
   } catch (e) { $('status').textContent = 'ما انحفظ: ' + (e?.code || 'تأكد من الاتصال'); }
@@ -393,11 +491,41 @@ function load(data){
   S.wallets.forEach(closeDays); render();
 }
 
+function startFirebase(){
+  const u = new URL(location.href), k = u.searchParams.get('k');
+  try {
+    if (k && k.length >= 30) { localStorage.setItem('masroofi_k', k); u.searchParams.delete('k'); history.replaceState(null, '', u); }
+    TOKEN = localStorage.getItem('masroofi_k');
+    if (!TOKEN) {
+      const b = crypto.getRandomValues(new Uint8Array(24));
+      TOKEN = btoa(String.fromCharCode(...b)).replace(/[+/=]/g, c => ({'+':'-','/':'_','=':''}[c]));
+      localStorage.setItem('masroofi_k', TOKEN);
+    }
+  } catch { return false; }
+  firebase.initializeApp(FB);
+  fb = firebase.database().ref('u/' + TOKEN);
+  let first = true;
+  fb.child('state').on('value', snap => {
+    const v = snap.val();
+    if (!v) { if (first && S.wallets.length) save(); }
+    else if (!dirty) load(JSON.parse(v));
+    $('status').textContent = 'محفوظ ومتزامن';
+    // الرسائل تنتظر لين توصل الحالة عشان ما تنضاف على بيانات قديمة
+    if (first) { first = false; fb.child('inbox').on('child_added', async m => {
+      applySms(m.val()?.raw); change(); await save(); m.ref.remove();
+    }); }
+  }, e => $('status').textContent = 'ما قدرت أوصل للحفظ: ' + e.code);
+  return true;
+}
+
 try { load(JSON.parse(localStorage.getItem('masroofi'))); } catch { load(); }
 (async () => {
   const [db, user] = await Promise.all([window.claude?.use('db'), window.claude?.use('user')]).catch(()=>[]);
   const id = user && await user.id();
-  if (!db || !id) { $('status').textContent = 'محفوظ على هالجهاز بس'; return; }
+  if (!db || !id) {
+    if (window.firebase && startFirebase()) return;
+    $('status').textContent = 'محفوظ على هالجهاز بس'; return;
+  }
   ref = db.collection('data/users/'+id).doc('state');
   const t = setTimeout(()=> $('status').textContent = 'الاتصال بطيء، تقدر تكمل وبيحفظ', 10000);
   ref.onSnapshot(snap => {
