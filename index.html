@@ -53,15 +53,19 @@ p{margin:0}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .spread{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .spread > label{flex:none;white-space:nowrap}
-.spread > select{min-width:0;max-width:60%}
+.spread > select{flex:1 1 0;min-width:0;max-width:62%;text-overflow:ellipsis}
+main > *,.stack > *,.panel > *,.box > *,.month > *,.tank > *{min-width:0}
 
 /* الأزرار والحقول */
-input,select{font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-s);padding:11px 14px;min-width:0;min-height:46px}
+input,select{font:inherit;line-height:2;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-s);padding:6px 14px;min-width:0;min-height:48px}
+select{-webkit-appearance:none;appearance:none;padding-inline-end:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%236E6888%27 stroke-width=%272.2%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:18px;background-position:left 12px center}
 input:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2.5px solid var(--ind);outline-offset:2px}
 input::placeholder{color:var(--mute)}
+input[type=number]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input.amt{width:120px;font-weight:600}
 input.grow{flex:1}
-button{font:600 15px var(--f-body);border:0;border-radius:999px;padding:11px 20px;min-height:46px;cursor:pointer;background:var(--ind);color:var(--on-ind);transition:transform .12s}
+button{font:600 15px/1.5 var(--f-body);border:0;border-radius:999px;padding:11px 20px;min-height:46px;cursor:pointer;background:var(--ind);color:var(--on-ind);transition:transform .12s}
 button:active{transform:scale(.96)}
 button.ghost{background:transparent;color:var(--ind);box-shadow:inset 0 0 0 1.5px var(--line)}
 button.boxbtn{background:var(--saf-ink);color:var(--saf)}
@@ -323,7 +327,8 @@ details > :not(summary){margin-top:10px}
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const fmt = n => (Math.round(n*100)/100).toLocaleString('en-US');
+// السالب يتعزل LTR عشان الناقص ما يقفز يمين الرقم داخل النص العربي
+const fmt = n => { const t = (Math.round(n*100)/100).toLocaleString('en-US'); return n < 0 ? '\u2066' + t + '\u2069' : t; };
 const key = d => d.toLocaleDateString('en-CA'); // YYYY-MM-DD بالتوقيت المحلي
 const NOW = new Date(), TODAY = key(NOW), MONTH = TODAY.slice(0,7);
 const DOW = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -437,7 +442,7 @@ function renderWallet(){
   $('boxList').innerHTML = '';
   w.box.slice().reverse().slice(0,30).forEach(b=>{
     const li = document.createElement('li');
-    li.innerHTML = `<span class="note">${b.d}</span><span class="num ${b.k==='dep'?'':'neg'}">${b.k==='dep'?'+':'−'}${fmt(b.a)}</span>`;
+    li.innerHTML = `<span class="note">${b.d}</span><span class="num ${b.k==='dep'?'':'neg'}">\u2066${b.k==='dep'?'+':'−'}${fmt(b.a)}\u2069</span>`;
     $('boxList').append(li);
   });
 
