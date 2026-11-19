@@ -116,6 +116,7 @@ h1 img{width:38px;height:38px;border-radius:11px}
 .chart i{position:relative;display:block;width:100%;background:var(--ind);border-radius:6px;min-height:3px}
 .chart i.over{background:var(--rasp)}
 .chart .f i{background:var(--line)}
+.chart .n i{visibility:hidden}
 .chart .t i{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ind)}
 .chart b{position:absolute;inset-inline:0;bottom:0;background:var(--ind-soft);border-radius:6px}
 .axis{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;margin-top:-6px}
@@ -506,7 +507,7 @@ function renderInsights(w, on){
   const mx = Math.max(1, ...vals.map(v => Math.max(v.s, v.b)));
   $('chartCard').hidden = !vals.some(v => v.s || v.b);
   $('chart').setAttribute('aria-label', 'صرف كل يوم هالشهر: ' + vals.filter(v => v.k <= TODAY).map(v => fmt(v.s)).join('، '));
-  $('chart').innerHTML = vals.map(v => `<div class="${v.k > TODAY ? 'f' : v.k === TODAY ? 't' : ''}" title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}">${v.b ? `<b style="height:${v.b/mx*100}%"></b>` : ''}<i class="${v.s > v.b ? 'over' : ''}" style="height:${v.k > TODAY ? 0 : v.s/mx*100}%"></i></div>`).join('');
+  $('chart').innerHTML = vals.map(v => `<div class="${v.k > TODAY ? 'f' : v.k === TODAY ? 't' : ''}${!v.b && !v.s ? ' n' : ''}" title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}">${v.b ? `<b style="height:${v.b/mx*100}%"></b>` : ''}<i class="${v.s > v.b ? 'over' : ''}" style="height:${v.k > TODAY ? 0 : v.s/mx*100}%"></i></div>`).join('');
   // وين يروح الصرف: يجمع حسب الوصف
   const g = {};
   for (let i = 1; i <= daysIn(MONTH); i++) for (const e of (w.days[MONTH+'-'+pad(i)]?.x || [])) {
