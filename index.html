@@ -87,6 +87,17 @@ select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(-
 .wcard .nm{font:700 17px var(--f-num)}
 .back{background:none;color:var(--acc);padding:4px 0;font-weight:500}
 h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.st{background:var(--bg);border-radius:12px;padding:10px 12px;display:grid;gap:2px}
+.st b{font:700 22px var(--f-num)}
+.st small{font-size:11px;color:var(--mute)}
+.st.bad b{color:var(--bad)}
+.chart{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;height:110px}
+.chart div{position:relative;display:flex;align-items:flex-end}
+.chart i{display:block;width:100%;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px}
+.chart i.over{background:var(--bad)}
+.chart b{position:absolute;inset-inline:-2px;border-top:2px dashed var(--mute)}
+.calc li{display:block}
 </style>
 
 <main>
@@ -162,6 +173,18 @@ h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
       </section>
     </div>
 
+    <section class="card" id="insCard" hidden>
+      <span class="label">قراءة الشهر</span>
+      <div class="stats" id="stats"></div>
+      <div class="note" id="insNote"></div>
+    </section>
+
+    <section class="card" id="chartCard" hidden>
+      <div class="spread"><span class="label">آخر ١٤ يوم</span><span class="note">المتقطّع = ميزانية اليوم</span></div>
+      <div class="chart" id="chart" role="img"></div>
+      <div class="spread note"><span>قبل أسبوعين</span><span>اليوم</span></div>
+    </section>
+
     <section class="card box">
       <div class="spread"><span class="label">صندوق هالخطة</span><span class="chip b">يتجمّع من باقي كل يوم</span></div>
       <div class="big num" id="boxBal"></div>
@@ -184,6 +207,24 @@ h2{font:700 22px var(--f-num);margin:0;text-wrap:balance}
       <span class="label">آخر الأيام</span>
       <ul id="past"></ul>
     </section>
+    <section class="card" id="topCard" hidden>
+      <span class="label">وين يروح صرفك هالشهر</span>
+      <ul id="top"></ul>
+    </section>
+
+    <section class="card calc">
+      <span class="label">حاسبات</span>
+      <details open><summary>أقدر أشتريها؟</summary>
+        <div class="row"><input id="buyAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="السعر"></div>
+        <ul id="buyOut"></ul>
+      </details>
+      <details><summary>هدف ادخار</summary>
+        <div class="row"><input id="goalAmt" class="amt num" type="number" inputmode="decimal" min="0" step="any" placeholder="المبلغ"><input id="goalDate" class="grow" type="date" aria-label="متى تبيه"></div>
+        <ul id="goalOut"></ul>
+      </details>
+    </section>
+
+    <button class="ghost" id="exportBtn">نزّل كل المصروفات (Excel / CSV)</button>
   </div>
 
   <!-- محرر الخطة -->
@@ -335,6 +376,8 @@ function renderWallet(){
     $('months').append(li);
   });
 
+  renderInsights(w, on); calcBuy(); calcGoal();
+
   const past = Object.keys(w.days).filter(k=>k<TODAY && w.days[k].b != null).sort().reverse().slice(0,7);
   $('pastCard').hidden = !past.length;
   $('past').innerHTML = '';
@@ -344,6 +387,92 @@ function renderWallet(){
     $('past').append(li);
   });
 }
+
+// ---- القراءات والحاسبات ----
+const pad = n => String(n).padStart(2,'0');
+const weekAvg = w => w.w.reduce((a,b)=>a+b,0)/7;
+const closedDays = w => Object.keys(w.days).filter(k => k < TODAY && w.days[k].b != null).sort();
+// متوسط اللي يروح للصندوق باليوم (آخر ٣٠ يوم خلصت)
+function avgSave(w){ const ks = closedDays(w).slice(-30); return ks.length ? ks.reduce((s,k)=>s+eff(w,k)-spent(w,k),0)/ks.length : null; }
+function renderInsights(w, on){
+  const m = monthTotals(w, MONTH), daysLeft = daysIn(MONTH) - NOW.getDate() + 1, passed = [];
+  let act = 0;
+  for (let i = 1; i <= daysIn(MONTH); i++) { const k = MONTH+'-'+pad(i); if (!active(w, k)) continue; act++; if (k <= TODAY) passed.push(k); }
+  $('insCard').hidden = !on || !passed.length;
+  if (on && passed.length) {
+    const sp = passed.reduce((s,k)=>s+spent(w,k),0), avg = sp/passed.length, proj = avg*act, perDay = (m.total-m.sp)/daysLeft;
+    let streak = 0; for (const k of closedDays(w).reverse()) { if (eff(w,k) - spent(w,k) >= 0) streak++; else break; }
+    const tiles = [
+      ['متوسط صرفك باليوم', fmt(Math.round(avg)), `ميزانيتك المتوسطة ${fmt(Math.round(weekAvg(w)))}`, avg > weekAvg(w)],
+      ['عشان تلتزم لا تتعدى باليوم', fmt(Math.max(0, Math.floor(perDay))), `لين آخر الشهر (${daysLeft} يوم)`, perDay < 0],
+      passed.length >= 3 && ['بهالمعدل الشهر بيخلص على', fmt(Math.round(proj)), proj > m.total ? `زيادة ${fmt(Math.round(proj-m.total))} عن المجموع` : `توفير ${fmt(Math.round(m.total-proj))}`, proj > m.total],
+      ['أيام التزام ورا بعض', streak, streak ? 'ما تعدّيت فيها ميزانية اليوم' : 'ابدأ السلسلة من اليوم'],
+    ].filter(Boolean);
+    $('stats').innerHTML = tiles.map(([l,v,n,bad]) => `<div class="st${bad?' bad':''}"><span class="label">${l}</span><b class="num">${v}</b><small class="num">${n}</small></div>`).join('');
+    const cd = closedDays(w);
+    let t = '';
+    if (cd.length >= 7) {
+      const s = Array(7).fill(0), c = Array(7).fill(0);
+      cd.forEach(k => { const d = dowOf(k); s[d] += spent(w,k); c[d]++; });
+      const av = s.map((x,i) => c[i] ? x/c[i] : -1), hi = av.indexOf(Math.max(...av));
+      t = `أكثر يوم تصرف فيه ${DOW[hi]}، بمتوسط ${fmt(Math.round(av[hi]))} ر.س وميزانيته ${fmt(w.w[hi])}.`;
+    }
+    $('insNote').textContent = t;
+  }
+  // آخر ١٤ يوم: العمود صرفك والمتقطّع ميزانية اليوم
+  const vals = [];
+  for (let i = 13; i >= 0; i--) { const k = key(addDays(NOW, -i)); vals.push({k, s: spent(w,k), b: active(w,k) ? eff(w,k) : 0}); }
+  const mx = Math.max(1, ...vals.map(v => Math.max(v.s, v.b)));
+  $('chartCard').hidden = !vals.some(v => v.s || v.b);
+  $('chart').setAttribute('aria-label', 'صرف آخر ١٤ يوم: ' + vals.map(v => fmt(v.s)).join('، '));
+  $('chart').innerHTML = vals.map(v => `<div title="${v.k.slice(5).replace('-','/')}: ${fmt(v.s)} من ${fmt(v.b)}"><i class="${v.s > v.b ? 'over' : ''}" style="height:${v.s/mx*100}%"></i>${v.b ? `<b style="bottom:${v.b/mx*100}%"></b>` : ''}</div>`).join('');
+  // وين يروح الصرف: يجمع حسب الوصف
+  const g = {};
+  for (let i = 1; i <= daysIn(MONTH); i++) for (const e of (w.days[MONTH+'-'+pad(i)]?.x || [])) {
+    const n = (e.n || '').trim() || 'بدون وصف'; (g[n] = g[n] || {a:0, c:0}).a += e.a; g[n].c++;
+  }
+  const top = Object.entries(g).sort((a,b) => b[1].a - a[1].a).slice(0, 6), tot = m.sp || 1;
+  $('topCard').hidden = !top.length;
+  $('top').innerHTML = '';
+  top.forEach(([n,v]) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span><span></span> <span class="note num">${v.c} مرة</span></span><span class="num">${fmt(v.a)} <small class="note">${Math.round(v.a/tot*100)}%</small></span>`;
+    li.querySelector('span span').textContent = n;
+    $('top').append(li);
+  });
+}
+const lines = (el, ts) => { el.innerHTML = ''; ts.filter(Boolean).forEach(t => { const li = document.createElement('li'); li.textContent = t; el.append(li); }); };
+function calcBuy(){
+  const w = W, a = +$('buyAmt').value;
+  if (!w || !(a > 0)) return lines($('buyOut'), []);
+  const m = monthTotals(w, MONTH), dl = daysIn(MONTH) - NOW.getDate() + 1, box = boxBalance(w), sv = avgSave(w), wa = weekAvg(w), left = m.total - m.sp;
+  lines($('buyOut'), [
+    wa && `تساوي ${fmt(Math.round(a/wa*10)/10)} يوم من ميزانيتك.`,
+    box >= a ? `الصندوق يغطيها، فيه ${fmt(box)} ويبقى ${fmt(box-a)}.` : `الصندوق فيه ${fmt(Math.max(0,box))}، ناقصك ${fmt(a-Math.max(0,box))}.`,
+    active(w, TODAY) && `لو حسبتها على الشهر يصير مسموحك باليوم ${fmt(Math.max(0,Math.floor((left-a)/dl)))} بدل ${fmt(Math.max(0,Math.floor(left/dl)))}.`,
+    box < a && sv > 0 && `بمعدل توفيرك (${fmt(Math.round(sv))} باليوم) تجمع الناقص خلال ${Math.ceil((a-Math.max(0,box))/sv)} يوم.`,
+  ]);
+}
+function calcGoal(){
+  const w = W, a = +$('goalAmt').value, d = $('goalDate').value;
+  if (!w || !(a > 0) || !d) return lines($('goalOut'), []);
+  const days = Math.round((new Date(d+'T12:00') - new Date(TODAY+'T12:00')) / 864e5);
+  if (days <= 0) return lines($('goalOut'), ['اختر تاريخ بعد اليوم.']);
+  const need = Math.max(0, a - Math.max(0, boxBalance(w))) / days, sv = avgSave(w);
+  lines($('goalOut'), [
+    need ? `تحتاج يروح للصندوق ${fmt(need)} ر.س باليوم لمدة ${days} يوم.` : 'الصندوق فيه المبلغ من الحين ✓',
+    need && sv != null && (sv >= need ? `توفيرك الحالي ${fmt(Math.round(sv))} باليوم يكفي ✓` : `توفيرك الحالي ${fmt(Math.round(sv))} باليوم، ناقصك ${fmt(need-sv)} باليوم.`),
+  ]);
+}
+$('buyAmt').oninput = calcBuy;
+$('goalAmt').oninput = $('goalDate').oninput = calcGoal;
+$('exportBtn').onclick = () => {
+  const rows = [['التاريخ','المبلغ','الوصف','المصدر']];
+  Object.keys(W.days).sort().forEach(k => (W.days[k].x || []).forEach(e => rows.push([k, e.a, e.n || '', e.src ? 'البنك' : 'يدوي'])));
+  const csv = '\ufeff' + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const l = document.createElement('a');
+  l.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); l.download = `مصروفي-${W.name}.csv`; l.click();
+};
 
 // ---- المحرر ----
 let ed = {}; // {fresh:true} لخطة جديدة
